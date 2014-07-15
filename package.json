@@ -1,0 +1,14 @@
+{
+  "name": "Moustache",
+  "main": "./lib/moustache",
+  "version": "0.1.0",
+  "description": "Simple todo list built into Atom",
+  "activationEvents": ["moustache:toggle"],
+  "repository": "https://github.com/atom/moustache",
+  "license": "MIT",
+  "engines": {
+    "atom": ">0.50.0"
+  },
+  "dependencies": {
+  }
+}
