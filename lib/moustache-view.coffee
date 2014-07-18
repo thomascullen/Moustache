@@ -1,29 +1,28 @@
 {View} = require 'atom'
-
-renderTasksList = (tasksList, tasks) ->
-  tasksList.find('li').remove()
-  Array::forEach.call tasks, (el, i) ->
-    tasksList.append("<li class='complete-"+el.complete+"'>\
-      <div class='checkbox complete-"+el.complete+"'></div>\
-        "+el.title+"\
-      </li>")
+MoustacheRepoView = require './moustache-repo-view'
+MoustacheIssueView = require './moustache-issue-view'
+MoustacheIssueDetailView = require './moustache-issue-detail-view'
 
 module.exports =
 class MoustacheView extends View
 
-  _DB = undefined
-
-  @content:(state) ->
-    @div class: 'moustache-wrapper', =>
-      @div class: "moustache", =>
-        @input type:"text", placeholder:"New Task", id:"new-moustache-task", class:"native-key-bindings", keyup: "newTask"
-        @ul outlet:"tasksList"
-
+  @content: ->
+    @div id:"moustache-wrapper", =>
+      @div id: "moustache", =>
+        @div id: "moustache-sidebar", =>
+          @div id: "moustache-user", =>
+            @img src: "http://api.randomuser.me/portraits/men/10.jpg"
+            @h2 "Thomas Cullen"
+            @span id: "moustache-logout", "Logout"
+          @h4 'Repositories'
+          @ul id:"moustache-repos", outlet:"moustacheRepos", =>
+            @li class:"current", =>
+              @p "All Issues"
+              @span "( 642 )"
+        @ul id:"moustache-issues", outlet:"moustacheIssues"
+        @div id:"moustache-main-view", outlet:"moustacheMainView", =>
   initialize: (serializeState) ->
-    atom.workspaceView.command "moustache:toggle", => @toggle()
-    this.on "click", ".moustache li .checkbox", (e) ->
-      e.currentTarget.classList.toggle "complete-false"
-      e.currentTarget.classList.toggle "complete-true"
+    atom.workspaceView.append(this)
 
   serialize: ->
 
@@ -31,48 +30,22 @@ class MoustacheView extends View
   destroy: ->
     @detach()
 
-  toggle: ->
-    if @hasParent()
-      @detach()
-    else
-      _this = this
-      DBOpenRequest = indexedDB.open("Moustache_DB", 1)
-      DBOpenRequest.onsuccess = (event) ->
-        _DB = event.target.result
-        atom.workspaceView.append(_this)
-        document.getElementById("new-moustache-task").focus()
-        _this.renderTasks()
+  renderRepos: (repos) ->
+    reposList = @moustacheRepos
+    Array::forEach.call repos, (repo, i) ->
+      repoView = new MoustacheRepoView(repo, i)
+      reposList.append(repoView)
 
-  renderTasks: ->
-    _list = @tasksList
-    db = _DB
-    transaction = db.transaction(["tasks"],"readwrite")
-    tasksStore = transaction.objectStore("tasks")
-    tasks = []
-    cursor = tasksStore.openCursor()
-    cursor.onsuccess = (event) ->
-      response = event.target.result
-      if response
-        tasks.push(response.value)
-        response.continue();
-      else
-        renderTasksList(_list, tasks)
+  renderIssues: (issues) ->
+    issuesList = @moustacheIssues
+    issuesList.html("")
+    Array::forEach.call issues, (issue, i) ->
+      issueView = new MoustacheIssueView(issue, i)
+      issuesList.append(issueView)
 
-  newTask: (event) ->
-    _list = @tasksList
-    newTaskInput = document.getElementById("new-moustache-task")
-    if event.keyCode == 13 && newTaskInput.value.length > 0
-      db = _DB
-      transaction = db.transaction(["tasks"],"readwrite")
-      tasksStore = transaction.objectStore("tasks")
-      task =
-        title:document.getElementById("new-moustache-task").value
-        complete:false
-        created_at:new Date()
-      req = tasksStore.add(task)
-      req.onsuccess = (e) ->
-        newTaskInput.value = ""
-        _list.prepend("<li class='animate'>\
-          <div class='checkbox'></div>\
-          "+task.title+"\
-        </li>")
+  renderIssue: (github, issue, repository) ->
+    mainView = @moustacheMainView
+    issueDetailView = new MoustacheIssueDetailView(issue, repository)
+    mainView.html(issueDetailView)
+    github.issues.getComments { user:repository.owner.login, repo:repository.name, number:issue.number }, (err,comments) ->
+      issueDetailView.renderComments(comments)

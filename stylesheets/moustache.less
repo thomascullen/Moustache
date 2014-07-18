@@ -3,97 +3,328 @@
 // See https://github.com/atom/atom-dark-ui/blob/master/stylesheets/ui-variables.less
 // for a full listing of what's available.
 @import "ui-variables";
+@import url(http://fonts.googleapis.com/css?family=Lato:100,300,400,700);
 
-.moustache-wrapper {
+@font-dark:rgba(83, 95, 101, 1.0);
+@m-blue:rgba(79, 175, 215, 1.0);
+
+#moustache-wrapper {
 
   top:0;
   left:0;
   width:100%;
   height:100%;
-  background:rgba(0,0,0,.5);
+  z-index:9999;
   position:absolute;
+  background:rgba(255,255,255,.4);
+  -webkit-animation:fadeIn .3s ease-in;
 
-  .moustache{
-    top:0;
-    left:0;
-    z-index:99;
+  *{
+    margin:0;
+    padding:0;
+    font-family: 'Lato', sans-serif !important;
+  }
+
+  #moustache-login{
+    top:50%;
+    left:50%;
     width:400px;
-    height:100%;
-    position:fixed;
-    padding-left:15px;
-    background:rgba(255,255,255,.96);
-    box-shadow:0 1px 5px rgba(0,0,0,.7);
-    -webkit-animation:slideIn .3s linear FORWARDS;
+    z-index:999;
+    padding:20px;
+    background:white;
+    margin-top:-150px;
+    border-radius:3px;
+    position:absolute;
+    margin-left:-200px;
+    -webkit-box-sizing: border-box;
+    box-shadow:0 1px 5px rgba(0,0,0,.4);
+    -webkit-animation:pop .3s linear;
 
-    #new-moustache-task{
+    input{
       width:100%;
-      border:none;
-      height:50px;
-      padding:0 15px;
+      padding:10px;
       font-size:15px;
       font-weight:400;
-      background:transparent;
-      border-bottom:1px solid #eee;
+      text-align:center;
+      border-radius:2px;
+      margin-bottom:20px;
+      border:1px solid #ccc;
       -webkit-box-sizing: border-box;
+      box-shadow:0 1px 5px rgba(0,0,0,.05);
     }
 
-    ul{
-      margin:0;
-      padding:0;
-      height:100%;
-      overflow-y:scroll;
-
-      li{
-        color:#666;
-        width:100%;
-        display:block;
-        font-size:14px;
-        font-weight:500;
-        padding:5px 15px;
-        -webkit-transition:all .3s;
-        border-bottom:1px solid #eee;
-        -webkit-box-sizing: border-box;
-
-        .checkbox{
-          width:14px;
-          height:14px;
-          cursor:pointer;
-          margin-right:10px;
-          border-radius:15px;
-          display:inline-block;
-          background:rgba(0,0,0,.1);
-        }
-
-        .checkbox:hover{
-          background:rgba(0,0,0,.2);
-        }
-
-        .checkbox.complete-true{
-          background:#4586f5;
-          -webkit-animation:pop .2s linear
-        }
-
-      }
-
-      li:hover{
-        background:#eee;
-      }
-
-      li.complete{
-        color:#999;
-        text-decoration:line-through;
-      }
-
+    input[type="submit"]{
+      color:#FFF;
+      border:none;
+      margin-bottom:0;
+      background:#4586f5;
     }
 
   }
 
+
+  // Main UI
+  #moustache{
+    top:20px;
+    left:20px;
+    background:white;
+    position:absolute;
+    border-radius:3px;
+    width:calc(~'100% - 40px');
+    height:calc(~'100% - 40px');
+    box-shadow:0 1px 10px rgba(0,0,0,.4);
+
+
+    // Sidebar
+    #moustache-sidebar{
+      float:left;
+      width:220px;
+      height:100%;
+      padding:20px;
+      border-right:1px solid #eee;
+
+      #moustache-user{
+        margin-bottom:30px;
+
+        img{
+          width:35px;
+          float:left;
+          margin-right:10px;
+          border-radius:3px;
+        }
+
+        h2{
+          font-size:15px;
+          font-weight:600;
+          color:@font-dark;
+        }
+
+        #moustache-logout{
+          color:#444;
+          font-size:13px;
+          cursor:pointer;
+        }
+
+        #moustache-logout:hover{
+          color:#000;
+          text-decoration:underline;
+        }
+
+      }
+
+      h4{
+        color:#999;
+        font-size:11px;
+        margin-bottom:10px;
+        text-transform:uppercase;
+      }
+
+      #moustache-repos{
+        clear:both;
+        list-style:none;
+        overflow-y:scroll;
+        height:calc(~'100% - 100px');
+
+        li{
+          cursor:pointer;
+          font-size:13px;
+          padding:5px 10px;
+
+          p{
+            font-weight:600;
+            margin-right:5px;
+            display:inline-block;
+          }
+
+          span{
+            font-weight:300;
+            display:inline-block;
+          }
+
+        }
+
+        li.current{
+          color:#fff;
+          margin-bottom:5px;
+          border-radius:3px;
+          background:@m-blue;
+        }
+
+      }
+
+    }
+
+    // Issues List
+    #moustache-issues{
+      float:left;
+      width:360px;
+      height:100%;
+      padding:20px;
+      list-style:none;
+      overflow-y:scroll;
+      border-right:1px solid #eee;
+
+      li{
+          width:100%;
+          cursor:pointer;
+          position:relative;
+          box-shadow:0 1px 0 #eee;
+          padding:15px 15px 15px 40px;
+          -webkit-box-sizing: border-box;
+
+          .moustache-issue-tag-dots{
+            top:18px;
+            left:15px;
+            width:10px;
+            position:absolute;
+
+            .moustache-issue-dot{
+              width:8px;
+              height:8px;
+              display:block;
+              border-radius:4px;
+              margin-bottom:8px;
+              background:rgba(73, 144, 226, 1.0);
+            }
+
+          }
+
+          span{
+            top:15px;
+            color:#ccc;
+            right:10px;
+            font-size:12px;
+            position:absolute;
+          }
+
+          h4{
+            font-size: 13px;
+            color: @font-dark;
+            margin-bottom:5px;
+          }
+
+          h3{
+            font-size:17px;
+            margin-bottom:7px;
+          }
+
+          p{
+            font-size:14px;
+            font-weight:400;
+            line-height:20px;
+            color:rgba(160, 165, 169, 1.0);
+          }
+
+      }
+
+      li:hover, li.current{
+        box-shadow:none;
+        border-radius:3px;
+        background:rgba(248, 248, 248, 1.0);
+      }
+
+    }
+
+    // Main View
+    #moustache-main-view{
+      float:left;
+      height:100%;
+      padding:30px;
+      overflow-y:scroll;
+      width:calc(~'100% - 580px');
+      -webkit-box-sizing: border-box;
+
+      h4{
+        font-size: 13px;
+        color: @font-dark;
+        margin-bottom:5px;
+      }
+
+      h3{
+        font-size:21px;
+        margin-bottom:15px;
+      }
+
+      #moustache-issue-labels{
+        list-style:none;
+        margin-bottom:10px;
+
+        li{
+          font-size:13px;
+          padding:0px 10px;
+          border-radius:3px;
+          margin-right:10px;
+          display:inline-block;
+          border:1px solid @m-blue;
+        }
+
+      }
+
+      p{
+        font-size:15px;
+        font-weight:400;
+        line-height:24px;
+        color:rgba(160, 165, 169, 1.0);
+      }
+
+      #moustache-comments{
+        width:100%;
+        list-style:none;
+        margin-top:30px;
+        padding-top:30px;
+        border-top:1px solid #eee;
+
+        li{
+          width:100%;
+          margin-bottom:30px;
+          padding-bottom:30px;
+          border-bottom:1px solid #eee;
+        }
+
+        img{
+          width:35px;
+          float:left;
+          margin-top:2px;
+          border-radius:3px;
+          margin-right:15px;
+        }
+
+        h4{
+          margin:0;
+          font-size:15px;
+          font-weight:600;
+        }
+
+        p{
+          font-size:14px;
+          font-weight:300;
+        }
+
+      }
+
+      #moustache-new-comment{
+        width:100%;
+        padding:10px;
+        font-size:14px;
+        border-radius:3px;
+        border:1px solid #ddd;
+        -webkit-box-sizing: border-box;
+      }
+
+    }
+
+
+  }
+
+
 }
 
+
+// Animations
 @-webkit-keyframes slideIn{
   0%{
     opacity:0;
-    -webkit-transform:translate(-400px,0);
+    -webkit-transform:translate(-300px,0);
   }
   70%{
     opacity:1;
@@ -103,6 +334,11 @@
     opacity:1;
     -webkit-transform:translate(-15px,0);
   }
+}
+
+@-webkit-keyframes fadeIn{
+  0%{opacity:0;}
+  100%{opacity:1;}
 }
 
 
