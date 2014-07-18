@@ -29,4 +29,3 @@ class IssueDetailView extends View
     Array::forEach.call comments, (comment, i) ->
       commentView = new MoustacheCommentView(comment)
       commentsList.append(commentView)
-      console.log comment

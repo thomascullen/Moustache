@@ -38,12 +38,15 @@ module.exports =
 
     # View Repo
     @currentView.on "click", "#moustache-repos li", (e) ->
+      _currentView.find("#moustache-main-view").html("")
       _currentView.find("#moustache-repos li").removeClass "current"
       e.currentTarget.classList.add("current")
       _this.viewRepo(e.currentTarget.getAttribute('index'))
 
     # View Issue
     @currentView.on "click", "#moustache-issues li", (e) ->
+      _currentView.find("#moustache-issues li").removeClass "current"
+      e.currentTarget.classList.add("current")
       _this.viewIssue(e.currentTarget.getAttribute('index'))
 
     # New Comment
@@ -137,12 +140,18 @@ module.exports =
     _view = @currentView
     _view.find("#moustache-issues").html("")
     _view.find("#moustache-moustache-main-view").html("")
-    repository = moustacheRepositories[i]
-    moustacheRepo = repository
-    github.issues.repoIssues { user:repository.owner.login, repo:repository.name }, (err, issues) ->
-      _view.renderIssues(issues) if issues
-      moustacheIssues = issues if issues
-      console.log err if err
+    if i
+      repository = moustacheRepositories[i]
+      moustacheRepo = repository
+      github.issues.repoIssues { user:repository.owner.login, repo:repository.name }, (err, issues) ->
+        _view.renderIssues(issues) if issues
+        moustacheIssues = issues if issues
+        console.log err if err
+    else
+      github.issues.getAll { page:1, per_page:100 }, (err, issues) ->
+        _view.renderIssues(issues) if issues
+        moustacheIssues = issues if issues
+        console.log err if err
 
   viewIssue: (i) ->
     _view = @currentView
