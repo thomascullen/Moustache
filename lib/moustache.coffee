@@ -7,6 +7,7 @@ moustacheRepositories = null
 moustacheIssues = null
 moustacheRepo = null
 moustacheIssue = null
+moustacheUser = null
 
 module.exports =
   currentview: null
@@ -102,10 +103,15 @@ module.exports =
         password: password
 
       @currentView = new MoustacheView()
+      _currentView = @currentView
       atom.workspaceView.append(@currentView)
       @currentView.renderRepos(moustacheRepositories) if moustacheRepositories
       @currentView.renderIssues(moustacheIssues) if moustacheIssues
       _this.loadData()
+
+      github.user.get {}, (err, user) ->
+        moustacheUser = user
+        _currentView.renderUser(user)
     else
       alert "Please enter a valid username & password"
 

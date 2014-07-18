@@ -10,9 +10,9 @@ class MoustacheView extends View
     @div id:"moustache-wrapper", =>
       @div id: "moustache", =>
         @div id: "moustache-sidebar", =>
-          @div id: "moustache-user", =>
-            @img src: "http://api.randomuser.me/portraits/men/10.jpg"
-            @h2 "Thomas Cullen"
+          @div id: "moustache-user", outlet:"moustacheUser", =>
+            @img src: ""
+            @h2 "Username"
             @span id: "moustache-logout", "Logout"
           @h4 'Repositories'
           @ul id:"moustache-repos", outlet:"moustacheRepos", =>
@@ -49,3 +49,7 @@ class MoustacheView extends View
     mainView.html(issueDetailView)
     github.issues.getComments { user:repository.owner.login, repo:repository.name, number:issue.number }, (err,comments) ->
       issueDetailView.renderComments(comments)
+
+  renderUser: (user) ->
+    @moustacheUser.find('img').attr('src', user.avatar_url)
+    @moustacheUser.find("h2").text(user.login)
