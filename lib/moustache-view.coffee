@@ -45,7 +45,7 @@ class MoustacheView extends View
 
   renderIssue: (github, issue, repository) ->
     mainView = @moustacheMainView
-    issueDetailView = new MoustacheIssueDetailView(issue, repository)
+    issueDetailView = new MoustacheIssueDetailView(github, issue, repository)
     mainView.html(issueDetailView)
     github.issues.getComments { user:repository.owner.login, repo:repository.name, number:issue.number }, (err,comments) ->
       issueDetailView.renderComments(comments)

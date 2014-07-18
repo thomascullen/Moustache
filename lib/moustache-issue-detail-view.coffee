@@ -1,12 +1,19 @@
 {View} = require 'atom'
 
 MoustacheCommentView = require './moustache-comment-view'
+moustacheIssue = null
+moustacheRepository = null
+moustacheGithub = null
 
 module.exports =
 class IssueDetailView extends View
 
-  @content: (issue, repository) ->
-    @div id:"mosutache-issue-detail", =>
+  @content: (github, issue, repository) ->
+    moustacheIssue = issue
+    moustacheRepository = repository
+    moustacheGithub = github
+    @div id:"moustache-issue-detail", =>
+      @button id:"moustache-close-issue", click:"closeIssue", outlet:"closeButton", 'Close Issue'
       @h4 repository.name
       @h3 issue.title
       @ul id:"moustache-issue-labels", =>
@@ -29,3 +36,12 @@ class IssueDetailView extends View
     Array::forEach.call comments, (comment, i) ->
       commentView = new MoustacheCommentView(comment)
       commentsList.append(commentView)
+
+  closeIssue: ->
+    moustacheGithub.issues.edit {
+      user:moustacheRepository.owner.login,
+      repo:moustacheRepository.name,
+      number:moustacheIssue.number,
+      state:"closed"
+      }, (err) ->
+        alert "done"
