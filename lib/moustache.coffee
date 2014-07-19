@@ -113,9 +113,12 @@ module.exports =
       @currentView.renderIssues(moustacheIssues) if moustacheIssues
       _this.loadData()
 
-      github.user.get {}, (err, user) ->
-        moustacheUser = user
-        _currentView.renderUser(user)
+      unless moustacheUser
+        github.user.get {}, (err, user) ->
+          moustacheUser = user
+          _currentView.renderUser(moustacheUser)
+      else
+        _currentView.renderUser(moustacheUser)
     else
       alert "Please enter a valid username & password"
 
@@ -132,7 +135,7 @@ module.exports =
       _view.renderRepos(repos) if repos
       moustacheRepositories = repos if repos
       console.log err if err
-    github.issues.getAll {}, (err, issues) ->
+    github.issues.getAll { state:"open" }, (err, issues) ->
       _view.stopIssuesLoading()
       _view.renderIssues(issues) if issues
       moustacheIssues = issues if issues

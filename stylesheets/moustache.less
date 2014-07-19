@@ -154,74 +154,101 @@
     }
 
     // Issues List
-    #moustache-issues{
+    #moustache-issues-wrapper{
       float:left;
       width:360px;
       height:100%;
       padding:20px;
       list-style:none;
       overflow-y:scroll;
+      position:relative;
       border-right:1px solid #eee;
 
-      li{
-          width:100%;
-          cursor:pointer;
-          overflow-x:hidden;
-          position:relative;
-          box-shadow:0 1px 0 #eee;
-          padding:15px 15px 15px 40px;
-          -webkit-box-sizing: border-box;
+      #moustache-issue-filters{
+        top:20px;
+        left:240px;
+        width:360px;
+        height:55px;
+        z-index:999;
+        position:fixed;
+        background:rgba(255,255,255,.7);
 
-          .moustache-issue-tag-dots{
-            top:18px;
-            left:15px;
-            width:10px;
-            position:absolute;
+        ul{
+          list-style:none;
 
-            .moustache-issue-dot{
-              width:8px;
-              height:8px;
-              display:block;
-              border-radius:4px;
-              margin-bottom:8px;
-              background:rgba(73, 144, 226, 1.0);
-            }
-
+          li{
+            float:left;
+            font-size:15px;
+            padding:5px 10px;
+            margin-right:10px;
           }
-
-          span{
-            top:15px;
-            color:#ccc;
-            right:10px;
-            font-size:12px;
-            position:absolute;
-          }
-
-          h4{
-            font-size: 13px;
-            color: @font-dark;
-            margin-bottom:5px;
-          }
-
-          h3{
-            font-size:17px;
-            line-height:22px;
-            margin-bottom:7px;
-          }
-
-          p{
-            font-size:14px;
-            font-weight:400;
-            line-height:20px;
-            color:rgba(160, 165, 169, 1.0);
-          }
+        }
 
       }
 
-      li:hover, li.current{
-        box-shadow:none;
-        border-radius:3px;
-        background:rgba(248, 248, 248, 1.0);
+      #moustache-issues{
+
+        li{
+            width:100%;
+            cursor:pointer;
+            overflow-x:hidden;
+            position:relative;
+            box-shadow:0 1px 0 #eee;
+            padding:15px 15px 15px 40px;
+            -webkit-box-sizing: border-box;
+
+            .moustache-issue-tag-dots{
+              top:18px;
+              left:15px;
+              width:10px;
+              position:absolute;
+
+              .moustache-issue-dot{
+                width:8px;
+                height:8px;
+                display:block;
+                border-radius:4px;
+                margin-bottom:8px;
+                background:rgba(73, 144, 226, 1.0);
+              }
+
+            }
+
+            span{
+              top:15px;
+              color:#ccc;
+              right:10px;
+              font-size:12px;
+              position:absolute;
+            }
+
+            h4{
+              font-size: 13px;
+              color: @font-dark;
+              margin-bottom:5px;
+            }
+
+            h3{
+              font-size:17px;
+              line-height:22px;
+              margin-bottom:7px;
+            }
+
+            p{
+              font-size:14px;
+              font-weight:400;
+              line-height:20px;
+              color:rgba(160, 165, 169, 1.0);
+            }
+
+        }
+
+        li:hover, li.current{
+          box-shadow:none;
+          border-radius:3px;
+          background:rgba(248, 248, 248, 1.0);
+        }
+
       }
 
     }

@@ -19,7 +19,14 @@ class MoustacheView extends View
           @ul id:"moustache-repos", outlet:"moustacheRepos", =>
             @li class:"current", =>
               @p "All Issues"
-        @ul id:"moustache-issues", outlet:"moustacheIssues"
+        @div id:"moustache-issues-wrapper", =>
+          @div id:"moustache-issue-filters", =>
+            @ul =>
+              @li "Open"
+              @li "Closed"
+              @li "All"
+            @button id:"moustache-new-issue", 'New Issue'
+          @ul id:"moustache-issues", outlet:"moustacheIssues", =>
         @div id:"moustache-main-view", outlet:"moustacheMainView", =>
   initialize: (serializeState) ->
     atom.workspaceView.append(this)
