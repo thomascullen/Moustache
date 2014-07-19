@@ -1,11 +1,11 @@
 {View} = require 'atom'
 
 markdown = require( "markdown" ).markdown
-
 MoustacheCommentView = require './moustache-comment-view'
 moustacheIssue = null
 moustacheRepository = null
 moustacheGithub = null
+path = atom.packages.packageDirPaths[0] + "/moustache/"
 
 module.exports =
 class IssueDetailView extends View
@@ -34,7 +34,14 @@ class IssueDetailView extends View
   destroy: ->
     @detach()
 
+  startCommentsLoading: ->
+    @moustacheComments.css('background',"url("+path+"stylesheets/loading.gif"+") no-repeat center");
+
+  stopCommentsLoading: ->
+    @moustacheComments.css({background:'white',minHeight:0});
+
   renderComments: (comments) ->
+    this.stopCommentsLoading();
     commentsList = @moustacheComments
     Array::forEach.call comments, (comment, i) ->
       commentView = new MoustacheCommentView(comment)

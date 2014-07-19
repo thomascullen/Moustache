@@ -128,7 +128,6 @@ module.exports =
 
   loadData: ->
     _view = @currentView
-    _view.startIssuesLoading()
     github.repos.getAll {}, (err, repos) ->
       _view.renderRepos(repos) if repos
       moustacheRepositories = repos if repos

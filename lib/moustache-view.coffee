@@ -53,6 +53,7 @@ class MoustacheView extends View
     mainView = @moustacheMainView
     issueDetailView = new MoustacheIssueDetailView(github, issue, repository)
     mainView.html(issueDetailView)
+    issueDetailView.startCommentsLoading()
     github.issues.getComments { user:repository.owner.login, repo:repository.name, number:issue.number }, (err,comments) ->
       issueDetailView.renderComments(comments)
 
