@@ -8,3 +8,5 @@ Install the packaage dependencies
 cd ~/.atom/packages/Moustache
 apm install
 ```
+
+### ctrl+alt+m
