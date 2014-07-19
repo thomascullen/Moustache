@@ -22,10 +22,10 @@ class MoustacheView extends View
         @div id:"moustache-issues-wrapper", =>
           @div id:"moustache-issue-filters", =>
             @ul =>
-              @li "Open"
+              @li class:"current", "Open"
               @li "Closed"
               @li "All"
-            @button id:"moustache-new-issue", 'New Issue'
+            # @button id:"moustache-new-issue", 'New Issue'
           @ul id:"moustache-issues", outlet:"moustacheIssues", =>
         @div id:"moustache-main-view", outlet:"moustacheMainView", =>
   initialize: (serializeState) ->
@@ -33,11 +33,11 @@ class MoustacheView extends View
 
   serialize: ->
 
-  # Tear down any state and detach
   destroy: ->
     @detach()
 
   startIssuesLoading: ->
+    @moustacheIssues.html("")
     @moustacheIssues.css('background',"url("+path+"stylesheets/loading.gif"+") no-repeat center");
 
   stopIssuesLoading: ->
@@ -45,13 +45,14 @@ class MoustacheView extends View
 
   renderRepos: (repos) ->
     reposList = @moustacheRepos
+    reposList.html("") # Empty the repos list
     Array::forEach.call repos, (repo, i) ->
       repoView = new MoustacheRepoView(repo, i)
       reposList.append(repoView)
 
   renderIssues: (issues) ->
     issuesList = @moustacheIssues
-    issuesList.html("")
+    issuesList.html("") # Empty the issues list
     Array::forEach.call issues, (issue, i) ->
       issueView = new MoustacheIssueView(issue, i)
       issuesList.append(issueView)

@@ -50,6 +50,12 @@ module.exports =
       e.currentTarget.classList.add("current")
       _this.viewIssue(e.currentTarget.getAttribute('index'))
 
+    # Filter issues
+    @currentView.on "click", "#moustache-issue-filters ul li", (e) ->
+      _currentView.find("#moustache-issue-filters ul li").removeClass "current"
+      e.currentTarget.classList.add("current")
+      _this.filterIssues(e.currentTarget.textContent.toLowerCase())
+
     # New Comment
     @currentView.on "keyup", "#moustache-new-comment", (e) ->
       if e.keyCode == 13
@@ -75,6 +81,7 @@ module.exports =
   toggle: ->
     _this = this
 
+    # If the moustache view is open then remove it
     if @currentView
       @currentView.destroy()
       @currentView = null
@@ -82,12 +89,15 @@ module.exports =
       @username = window.localStorage.getItem("github-username")
       password = window.localStorage.getItem("github-password")
 
+      # If there is a username & password then proceed with login
       if @username && password
         _this.login(@username, password)
       else
+        # present login form
         @currentView = new MoustacheLoginView()
         atom.workspaceView.append(@currentView)
 
+      # Attach moustache listeners
       _this.listeners()
 
   login: (username, password) ->
@@ -96,29 +106,40 @@ module.exports =
     if username.length > 0 && password.length > 0
       console.log "Moustache: Logging In"
 
+      # Save username and password in localstorage
       window.localStorage.setItem("github-username", username)
       window.localStorage.setItem("github-password", password)
 
       @currentView.destroy() if @currentView
 
+      # Authenticate github API
       github.authenticate
         type: "basic"
         username: username
         password: password
 
+      # Render the main moustache view
       @currentView = new MoustacheView()
       _currentView = @currentView
       atom.workspaceView.append(@currentView)
+
+      # Render any previously loaded repositories & issues
       @currentView.renderRepos(moustacheRepositories) if moustacheRepositories
       @currentView.renderIssues(moustacheIssues) if moustacheIssues
+
+      # Fetch data from github
       _this.loadData()
 
+      # unless there is already a current user
       unless moustacheUser
+        # get the users information
         github.user.get {}, (err, user) ->
-          moustacheUser = user
+          moustacheUser = user # store user
           _currentView.renderUser(moustacheUser)
       else
+        # Render the current user section
         _currentView.renderUser(moustacheUser)
+
     else
       alert "Please enter a valid username & password"
 
@@ -131,10 +152,14 @@ module.exports =
 
   loadData: ->
     _view = @currentView
+
+    # Get repositories
     github.repos.getAll {}, (err, repos) ->
-      _view.renderRepos(repos) if repos
-      moustacheRepositories = repos if repos
+      moustacheRepositories = repos if repos # update the stored repos
+      _view.renderRepos(repos) if repos # render the repos
       console.log err if err
+
+    # Get issues
     github.issues.getAll { state:"open" }, (err, issues) ->
       _view.stopIssuesLoading()
       _view.renderIssues(issues) if issues
@@ -145,6 +170,8 @@ module.exports =
     _view = @currentView
     _view.find("#moustache-issues").html("")
     _view.find("#moustache-moustache-main-view").html("")
+    _view.find("#moustache-issue-filters ul li").removeClass("current")
+    _view.find("#moustache-issue-filters ul li").first().addClass("current")
     _view.startIssuesLoading()
 
     if i
@@ -156,7 +183,8 @@ module.exports =
         moustacheIssues = issues if issues
         console.log err if err
     else
-      github.issues.getAll { page:1, per_page:100 }, (err, issues) ->
+      moustacheRepo = null
+      github.issues.getAll {}, (err, issues) ->
         _view.stopIssuesLoading()
         _view.renderIssues(issues) if issues
         moustacheIssues = issues if issues
@@ -169,5 +197,19 @@ module.exports =
     moustacheRepo = issue.repository if issue.repository
     _view.renderIssue(github, issue, moustacheRepo)
 
-  newIssue: ->
-    alert "New Issue"
+  filterIssues: (filter) ->
+    _view = @currentView
+    _view.startIssuesLoading()
+
+    if moustacheRepo
+      github.issues.repoIssues { user:moustacheRepo.owner.login, repo:moustacheRepo.name, state:filter }, (err, issues) ->
+        _view.stopIssuesLoading()
+        _view.renderIssues(issues) if issues
+        moustacheIssues = issues if issues
+        console.log err if err
+    else
+      github.issues.getAll { state:filter }, (err, issues) ->
+        _view.stopIssuesLoading()
+        _view.renderIssues(issues) if issues
+        moustacheIssues = issues if issues
+        console.log err if err
