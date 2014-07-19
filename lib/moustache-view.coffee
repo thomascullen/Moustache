@@ -2,6 +2,7 @@
 MoustacheRepoView = require './moustache-repo-view'
 MoustacheIssueView = require './moustache-issue-view'
 MoustacheIssueDetailView = require './moustache-issue-detail-view'
+path = atom.packages.packageDirPaths[0] + "/moustache/"
 
 module.exports =
 class MoustacheView extends View
@@ -18,7 +19,6 @@ class MoustacheView extends View
           @ul id:"moustache-repos", outlet:"moustacheRepos", =>
             @li class:"current", =>
               @p "All Issues"
-              @span "( 642 )"
         @ul id:"moustache-issues", outlet:"moustacheIssues"
         @div id:"moustache-main-view", outlet:"moustacheMainView", =>
   initialize: (serializeState) ->
@@ -29,6 +29,12 @@ class MoustacheView extends View
   # Tear down any state and detach
   destroy: ->
     @detach()
+
+  startIssuesLoading: ->
+    @moustacheIssues.css('background',"url("+path+"stylesheets/loading.gif"+") no-repeat center");
+
+  stopIssuesLoading: ->
+    @moustacheIssues.css('background',"white");
 
   renderRepos: (repos) ->
     reposList = @moustacheRepos

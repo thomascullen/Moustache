@@ -9,3 +9,4 @@
 # https://atom.io/docs/latest/advanced/keymaps
 '.workspace':
   'ctrl-alt-m': 'moustache:toggle'
+  'ctrl-alt-n': 'moustache:new_issue'

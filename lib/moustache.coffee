@@ -15,6 +15,7 @@ module.exports =
 
   activate: (state) ->
     atom.workspaceView.command "moustache:toggle", => @toggle()
+    atom.workspaceView.command "moustache:new_issue", => @newIssue()
 
   deactivate: ->
     @currentView.destroy()
@@ -127,11 +128,13 @@ module.exports =
 
   loadData: ->
     _view = @currentView
+    _view.startIssuesLoading()
     github.repos.getAll {}, (err, repos) ->
       _view.renderRepos(repos) if repos
       moustacheRepositories = repos if repos
       console.log err if err
-    github.issues.getAll { page:1, per_page:100 }, (err, issues) ->
+    github.issues.getAll {}, (err, issues) ->
+      _view.stopIssuesLoading()
       _view.renderIssues(issues) if issues
       moustacheIssues = issues if issues
       console.log err if err
@@ -140,15 +143,19 @@ module.exports =
     _view = @currentView
     _view.find("#moustache-issues").html("")
     _view.find("#moustache-moustache-main-view").html("")
+    _view.startIssuesLoading()
+
     if i
       repository = moustacheRepositories[i]
       moustacheRepo = repository
       github.issues.repoIssues { user:repository.owner.login, repo:repository.name }, (err, issues) ->
+        _view.stopIssuesLoading()
         _view.renderIssues(issues) if issues
         moustacheIssues = issues if issues
         console.log err if err
     else
       github.issues.getAll { page:1, per_page:100 }, (err, issues) ->
+        _view.stopIssuesLoading()
         _view.renderIssues(issues) if issues
         moustacheIssues = issues if issues
         console.log err if err
@@ -159,3 +166,6 @@ module.exports =
     moustacheIssue = issue
     moustacheRepo = issue.repository if issue.repository
     _view.renderIssue(github, issue, moustacheRepo)
+
+  newIssue: ->
+    alert "New Issue"

@@ -5,7 +5,7 @@ class IssueView extends View
 
   @content: (comment) ->
     @li =>
-      @img src:"http://api.randomuser.me/portraits/men/69.jpg"
+      @img src:comment.user.avatar_url
       @h4 comment.user.login
       @p comment.body
 

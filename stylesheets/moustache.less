@@ -145,7 +145,6 @@
 
         li.current{
           color:#fff;
-          margin-bottom:5px;
           border-radius:3px;
           background:@m-blue;
         }
@@ -167,6 +166,7 @@
       li{
           width:100%;
           cursor:pointer;
+          overflow-x:hidden;
           position:relative;
           box-shadow:0 1px 0 #eee;
           padding:15px 15px 15px 40px;
@@ -205,6 +205,7 @@
 
           h3{
             font-size:17px;
+            line-height:22px;
             margin-bottom:7px;
           }
 
@@ -231,8 +232,28 @@
       height:100%;
       padding:30px;
       overflow-y:scroll;
+      position:relative;
       width:calc(~'100% - 580px');
       -webkit-box-sizing: border-box;
+
+      #moustache-close-issue{
+        top:20px;
+        right:20px;
+        color:#FFF;
+        border:none;
+        height:35px;
+        padding:0 15px;
+        font-size:15px;
+        line-height:35px;
+        border-radius:3px;
+        position:absolute;
+        background:@m-blue;
+        box-shadow:0 1px 3px rgab(0,0,0,.2);
+      }
+
+      #moustache-close-issue:hover{
+        background:darken(@m-blue, 10%);
+      }
 
       h4{
         font-size: 13px;
@@ -265,6 +286,13 @@
         font-weight:400;
         line-height:24px;
         color:rgba(160, 165, 169, 1.0);
+      }
+
+      #moustache-description{
+
+        width:100%;
+        img{max-width:100%;border-radius:3px;}
+
       }
 
       #moustache-comments{
@@ -304,6 +332,7 @@
 
       #moustache-new-comment{
         width:100%;
+        resize:none;
         padding:10px;
         font-size:14px;
         border-radius:3px;
@@ -321,10 +350,10 @@
 
 
 // Animations
-@-webkit-keyframes slideIn{
+@-webkit-keyframes slideDown{
   0%{
     opacity:0;
-    -webkit-transform:translate(-300px,0);
+    -webkit-transform:translate(0, -100px);
   }
   70%{
     opacity:1;
@@ -332,7 +361,7 @@
   }
   100%{
     opacity:1;
-    -webkit-transform:translate(-15px,0);
+    -webkit-transform:translate(0, 10px);
   }
 }
 
@@ -345,7 +374,7 @@
 @-webkit-keyframes pop{
   0%{
     opacity:0;
-    -webkit-transform:scale(.4);
+    -webkit-transform:scale(.5);
   }
   70%{
     opacity:1;

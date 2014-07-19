@@ -1,5 +1,7 @@
 {View} = require 'atom'
 
+markdown = require( "markdown" ).markdown
+
 MoustacheCommentView = require './moustache-comment-view'
 moustacheIssue = null
 moustacheRepository = null
@@ -18,12 +20,13 @@ class IssueDetailView extends View
       @h3 issue.title
       @ul id:"moustache-issue-labels", =>
         @li style:"border-color:##{label.color};color:##{label.color}", label.name for label in issue.labels
-      @p issue.body
+      @p outlet:"moustacheDescription", id:"moustache-description", issue.body
       @ul id:"moustache-comments", outlet:"moustacheComments", =>
       @textarea id:"moustache-new-comment", placeholder:"Write a new comment", class:"native-key-bindings"
 
   initialize: (serializeState) ->
     atom.workspaceView.append(this)
+    @moustacheDescription.html( markdown.toHTML( @moustacheDescription.text() ) )
 
   serialize: ->
 
