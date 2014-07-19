@@ -16,9 +16,10 @@ class MoustacheView extends View
             @h2 "Username"
             @span id: "moustache-logout", "Logout"
           @h4 'Repositories'
-          @ul id:"moustache-repos", outlet:"moustacheRepos", =>
+          @ul id:"moustache-repos", =>
             @li class:"current", =>
               @p "All Issues"
+            @div id:"moustache-user-repos", outlet:"moustacheRepos"
         @div id:"moustache-issues-wrapper", =>
           @div id:"moustache-issue-filters", =>
             @ul =>
