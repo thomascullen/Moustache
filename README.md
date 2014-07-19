@@ -1,4 +1,5 @@
 ![Moustache](http://www.thomascullendesign.com/Moustache.png)
+
 Github issues built directly into Atom editor.
 
 ##Setup
