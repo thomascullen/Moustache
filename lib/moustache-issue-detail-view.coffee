@@ -56,6 +56,7 @@ class IssueDetailView extends View
     _toggleButton = @toggleButton
 
     if moustacheIssue.state == "open"
+      moustacheIssue.state = "closed"
       _toggleButton.addClass("open").text("Reopen Issue")
       moustacheGithub.issues.edit {
         user:moustacheRepository.owner.login,
@@ -65,6 +66,7 @@ class IssueDetailView extends View
         }, (err) ->
           console.log "Issue closed"
     else
+      moustacheIssue.state = "open"
       _toggleButton.removeClass("open").text("Close Issue")
       moustacheGithub.issues.edit {
         user:moustacheRepository.owner.login,
