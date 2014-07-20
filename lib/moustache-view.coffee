@@ -17,16 +17,17 @@ class MoustacheView extends View
             @h2 "Username"
             @span id: "moustache-logout", "Logout"
           @h4 'Repositories'
-          @ul id:"moustache-repos", outlet:"moustacheRepos", =>
+          @ul id:"moustache-repos", =>
             @li class:"current", =>
               @p "All Issues"
+            @div id:"moustache-user-repos", outlet:"moustacheRepos"
         @div id:"moustache-issues-wrapper", =>
           @div id:"moustache-issue-filters", =>
             @ul =>
-              @li "Open"
+              @li class:"current", "Open"
               @li "Closed"
               @li "All"
-            @button id:"moustache-new-issue", 'New Issue'
+            # @button id:"moustache-new-issue", 'New Issue'
           @ul id:"moustache-issues", outlet:"moustacheIssues", =>
         @div id:"moustache-main-view", outlet:"moustacheMainView", =>
 
@@ -39,6 +40,7 @@ class MoustacheView extends View
     @detach()
 
   startIssuesLoading: ->
+    @moustacheIssues.html("")
     @moustacheIssues.css('background',"url("+path+"stylesheets/loading.gif"+") no-repeat center");
 
   stopIssuesLoading: ->
