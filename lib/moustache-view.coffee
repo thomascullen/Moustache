@@ -2,6 +2,7 @@
 MoustacheRepoView = require './moustache-repo-view'
 MoustacheIssueView = require './moustache-issue-view'
 MoustacheIssueDetailView = require './moustache-issue-detail-view'
+# The patch to the pacakge to load in assets
 path = atom.packages.packageDirPaths[0] + "/moustache/"
 
 module.exports =
@@ -28,12 +29,12 @@ class MoustacheView extends View
             @button id:"moustache-new-issue", 'New Issue'
           @ul id:"moustache-issues", outlet:"moustacheIssues", =>
         @div id:"moustache-main-view", outlet:"moustacheMainView", =>
+
   initialize: (serializeState) ->
     atom.workspaceView.append(this)
 
   serialize: ->
 
-  # Tear down any state and detach
   destroy: ->
     @detach()
 
@@ -44,14 +45,15 @@ class MoustacheView extends View
     @moustacheIssues.css('background',"white");
 
   renderRepos: (repos) ->
-    reposList = @moustacheRepos
+    reposList = @moustacheRepos # Fetch the repo list from DOM
+    # Append a new repo view for each repo
     Array::forEach.call repos, (repo, i) ->
       repoView = new MoustacheRepoView(repo, i)
       reposList.append(repoView)
 
   renderIssues: (issues) ->
-    issuesList = @moustacheIssues
-    issuesList.html("")
+    issuesList = @moustacheIssues # fetch the issues list from the DOM
+    issuesList.html("") # Clear the issues list
     Array::forEach.call issues, (issue, i) ->
       issueView = new MoustacheIssueView(issue, i)
       issuesList.append(issueView)

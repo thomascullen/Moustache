@@ -1,8 +1,11 @@
 MoustacheView = require './moustache-view'
 MoustacheLoginView = require './moustache-login-view'
 MoustacheCommentView = require './moustache-comment-view'
+
+# Setup github API
 GitHubApi = require "github"
 github = new GitHubApi( version: "3.0.0" )
+
 moustacheRepositories = null
 moustacheIssues = null
 moustacheRepo = null
@@ -15,7 +18,6 @@ module.exports =
 
   activate: (state) ->
     atom.workspaceView.command "moustache:toggle", => @toggle()
-    atom.workspaceView.command "moustache:new_issue", => @newIssue()
 
   deactivate: ->
     @currentView.destroy()
@@ -39,7 +41,6 @@ module.exports =
 
     # View Repo
     @currentView.on "click", "#moustache-repos li", (e) ->
-      _currentView.find("#moustache-main-view").html("")
       _currentView.find("#moustache-repos li").removeClass "current"
       e.currentTarget.classList.add("current")
       _this.viewRepo(e.currentTarget.getAttribute('index'))
@@ -57,18 +58,23 @@ module.exports =
         content = document.getElementById("moustache-new-comment").value
         document.getElementById("moustache-new-comment").value = ""
 
+        # create the issue comment
         github.issues.createComment {
           user:moustacheRepo.owner.login,
           repo:moustacheRepo.name,
           number:moustacheIssue.number,
           body: content }, (err, issues) ->
-            console.log "Moustache: Finished posting comment"
+            console.log err if err
 
+        # Create a new comment object
+        # This is the same structure as returned
+        # from the github issues api comments call
         comment =
           user:
             login: "Current User"
           body: content
 
+        # Render the new comment
         commentView = new MoustacheCommentView(comment)
         _currentView.find("#moustache-comments").append(commentView)
 
@@ -94,25 +100,33 @@ module.exports =
     _this = this
 
     if username.length > 0 && password.length > 0
-      console.log "Moustache: Logging In"
 
+      # Store the username & password in localstorage
       window.localStorage.setItem("github-username", username)
       window.localStorage.setItem("github-password", password)
 
+      # Destroy any current views there might be
       @currentView.destroy() if @currentView
 
+      # Authenticate the github API
       github.authenticate
         type: "basic"
         username: username
         password: password
 
+      # Create a new main moustache view
       @currentView = new MoustacheView()
       _currentView = @currentView
       atom.workspaceView.append(@currentView)
+
+      # Render any previously stored repositories or issues
       @currentView.renderRepos(moustacheRepositories) if moustacheRepositories
       @currentView.renderIssues(moustacheIssues) if moustacheIssues
+
+      # Fetch new data from github
       _this.loadData()
 
+      # Fetch the current user if there isnt one
       unless moustacheUser
         github.user.get {}, (err, user) ->
           moustacheUser = user
@@ -123,51 +137,60 @@ module.exports =
       alert "Please enter a valid username & password"
 
   logout: ->
+    # Remove the username & password from localstorage
     window.localStorage.removeItem("github-username")
     window.localStorage.removeItem("github-password")
+    # Destroy the current view
     @currentView.destroy()
+    # Show the login form
     @currentView = new MoustacheLoginView()
     atom.workspaceView.append(@currentView)
 
   loadData: ->
     _view = @currentView
+
+    # Fetch all the users repositories
     github.repos.getAll {}, (err, repos) ->
       _view.renderRepos(repos) if repos
       moustacheRepositories = repos if repos
       console.log err if err
+
+    # Fetch all of the users open issues
     github.issues.getAll { state:"open" }, (err, issues) ->
       _view.stopIssuesLoading()
       _view.renderIssues(issues) if issues
       moustacheIssues = issues if issues
       console.log err if err
 
-  viewRepo: (i) ->
+  viewRepo: (index) ->
     _view = @currentView
-    _view.find("#moustache-issues").html("")
-    _view.find("#moustache-moustache-main-view").html("")
-    _view.startIssuesLoading()
+    _view.find("#moustache-issues").html("") # Clear issues view
+    _view.find("#moustache-moustache-main-view").html("") # Clear main view
+    _view.startIssuesLoading() # Show loading animation
 
-    if i
-      repository = moustacheRepositories[i]
-      moustacheRepo = repository
+    # if an index was passed then fetch that repo from the moustacheRepositories array.
+    # Otherwise assume they have selected all issues and load all issues
+    if index
+      repository = moustacheRepositories[index]
+      moustacheRepo = repository # Set the current repository
+      # Fetch reposiroies issues
       github.issues.repoIssues { user:repository.owner.login, repo:repository.name }, (err, issues) ->
-        _view.stopIssuesLoading()
-        _view.renderIssues(issues) if issues
-        moustacheIssues = issues if issues
+        _view.stopIssuesLoading() # Stop loading animation
+        _view.renderIssues(issues) if issues # render the issues
+        moustacheIssues = issues if issues # store the issues
         console.log err if err
     else
-      github.issues.getAll { page:1, per_page:100 }, (err, issues) ->
-        _view.stopIssuesLoading()
-        _view.renderIssues(issues) if issues
-        moustacheIssues = issues if issues
+      # Geth all the users issues
+      github.issues.getAll {}, (err, issues) ->
+        _view.stopIssuesLoading() # stop loading animation
+        _view.renderIssues(issues) if issues # render the issues
+        moustacheIssues = issues if issues #store the issues
         console.log err if err
 
-  viewIssue: (i) ->
+  viewIssue: (index) ->
     _view = @currentView
-    issue = moustacheIssues[i]
-    moustacheIssue = issue
-    moustacheRepo = issue.repository if issue.repository
-    _view.renderIssue(github, issue, moustacheRepo)
+    issue = moustacheIssues[index] # Get the issues from the stored issues array
+    moustacheIssue = issue # Set the current issue
+    moustacheRepo = issue.repository if issue.repository # set the current repo if there is one
+    _view.renderIssue(github, issue, moustacheRepo) # render the issue
 
-  newIssue: ->
-    alert "New Issue"
