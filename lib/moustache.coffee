@@ -12,6 +12,18 @@ moustacheRepo = null
 moustacheIssue = null
 moustacheUser = null
 
+MTIssues = []
+MTRepos = []
+
+MTIssue = (title, state) ->
+  @title = title
+  @state = state
+  return
+
+MTRepo = (name, open_issues) ->
+  @name = name
+  @open_issues = open_issues
+
 module.exports =
   currentview: null
   username: null
@@ -164,12 +176,20 @@ module.exports =
 
     # Fetch all the users repositories
     github.repos.getAll {}, (err, repos) ->
+
+      Array::forEach.call repos, (repo, i) ->
+        MTRepos.push(new MTRepo(repo.name, repo.open_issues))
+
       moustacheRepositories = repos if repos # update the stored repos
       _view.renderRepos(repos) if repos # render the repos
       console.log err if err
 
     # Fetch all of the users open issues
-    github.issues.getAll { state:"open" }, (err, issues) ->
+    github.issues.getAll { state:"open", filter:"all" }, (err, issues) ->
+
+      Array::forEach.call issues, (issue, i) ->
+        MTIssues.push(new MTIssue(issue.title, issue.state))
+
       _view.stopIssuesLoading()
       _view.renderIssues(issues) if issues
       moustacheIssues = issues if issues

@@ -49,6 +49,7 @@ class MoustacheView extends View
   renderRepos: (repos) ->
     reposList = @moustacheRepos # Fetch the repo list from DOM
     # Append a new repo view for each repo
+    reposList.html("")
     Array::forEach.call repos, (repo, i) ->
       repoView = new MoustacheRepoView(repo, i)
       reposList.append(repoView)
