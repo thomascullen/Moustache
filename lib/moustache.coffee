@@ -90,6 +90,20 @@ MTFilter = (state, repo) ->
     i++
   return issues
 
+MTSyncIssues = (page, callback) ->
+  console.log "Getting issues page : #{page}"
+  github.issues.getAll { state:"all", filter:"all", per_page:100, page:page }, (err, issues) ->
+    console.log err if err
+
+    if issues.length > 0
+      # Store each issue
+      Array::forEach.call issues, (issue, i) ->
+        MTIssues.push(new MTIssue(issue))
+
+      MTSyncIssues(page+1, callback)
+    else
+      callback()
+
 module.exports =
   currentview: null
   username: null
@@ -245,37 +259,40 @@ module.exports =
     # Render the repos
     _view.renderRepos(MTRepos)
 
-    # Fetch all the users repositories
-    github.repos.getAll {}, (err, repos) ->
-      console.log err if err
-
-      # upate the repos
-      Array::forEach.call repos, (repo, i) ->
-        MTRepos.push(new MTRepo(repo))
-
-      # Refresh the repos
+    if MTRepos.length > 0
       _view.renderRepos(MTRepos)
+    else
+      # Fetch all the users repositories
+      github.repos.getAll {}, (err, repos) ->
+        console.log err if err
+
+        # upate the repos
+        Array::forEach.call repos, (repo, i) ->
+          MTRepos.push(new MTRepo(repo))
+
+        # Refresh the repos
+        _view.renderRepos(MTRepos)
 
 
     # Render the current Issues
     _view.renderIssues(MTCurrentIssues) if MTCurrentIssues.length > 0
 
-    # Fetch all of the users issues
-    github.issues.getAll { state:"all", filter:"all", per_page:100 }, (err, issues) ->
+    unless MTIssues.length > 1
+      _view.startIssuesLoading()
+      # Fetch all of the users issues
+      MTSyncIssues 1, ->
+        # If there isnt already a selected issue set then load all
+        unless MTCurrentIssues.length > 1
+          MTCurrentIssues = MTIssues
+          MTCurrentIssues = MTFilter(MTState)
+          _view.renderIssues(MTCurrentIssues)
 
-      # Store each issue
-      Array::forEach.call issues, (issue, i) ->
-        MTIssues.push(new MTIssue(issue))
-
-      # If there isnt already a selected issue set then load all
-      unless MTCurrentIssues.length > 1
-        MTCurrentIssues = MTIssues
-        MTCurrentIssues = MTFilter(MTState)
-        _view.renderIssues(MTCurrentIssues)
-
-      # Stop any loading animation
-      _view.stopIssuesLoading()
-      console.log err if err
+        # Stop any loading animation
+        _view.stopIssuesLoading()
+    else
+      MTCurrentIssues = MTIssues
+      MTCurrentIssues = MTFilter(MTState)
+      _view.renderIssues(MTCurrentIssues)
 
   viewRepo: (id) ->
     _view = @currentView
