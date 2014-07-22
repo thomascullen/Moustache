@@ -181,8 +181,7 @@ module.exports =
 
     # If the moustache view is open then remove it
     if @currentView
-      @currentView.destroy()
-      @currentView = null
+      @currentView.toggle()
     else
       @username = window.localStorage.getItem("github-username")
       password = window.localStorage.getItem("github-password")
