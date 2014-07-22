@@ -3,7 +3,8 @@
 Github issues built directly into Atom editor.
 
 ##Setup
-Install the packaage dependencies
+Place the moustache folder inside `~/.atom/packages`.
+Then install the package dependencies
 ```
 cd ~/.atom/packages/Moustache
 apm install
