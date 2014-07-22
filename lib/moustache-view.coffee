@@ -58,7 +58,7 @@ class MoustacheView extends View
     issuesList = @moustacheIssues # fetch the issues list from the DOM
     issuesList.html("") # Clear the issues list
     Array::forEach.call issues, (issue, i) ->
-      issueView = new MoustacheIssueView(issue, i)
+      issueView = new MoustacheIssueView(issue)
       issuesList.append(issueView)
 
   renderIssue: (github, issue, repository) ->

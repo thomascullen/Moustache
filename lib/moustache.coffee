@@ -14,15 +14,27 @@ moustacheUser = null
 
 MTIssues = []
 MTRepos = []
+MTCurrentIssues = null
+MTCurrentRepos = null
 
-MTIssue = (title, state) ->
-  @title = title
-  @state = state
+getIssue = (number) ->
+  Array::forEach.call MTIssues, (MTIssue, i) ->
+    return MTIssue if parseInt(MTIssue.number) == parseInt(number)
+
+MTIssue = (issue) ->
+  @number = issue.number
+  @title = issue.title
+  @state = issue.state
+  @comments = issue.comments
+  @body = issue.body
+  @labels = issue.labels
   return
 
-MTRepo = (name, open_issues) ->
-  @name = name
-  @open_issues = open_issues
+MTRepo = (repo) ->
+  @id = repo.id
+  @name = repo.name
+  @open_issues = repo.open_issues
+  return
 
 module.exports =
   currentview: null
@@ -61,7 +73,7 @@ module.exports =
     @currentView.on "click", "#moustache-issues li", (e) ->
       _currentView.find("#moustache-issues li").removeClass "current"
       e.currentTarget.classList.add("current")
-      _this.viewIssue(e.currentTarget.getAttribute('index'))
+      _this.viewIssue(e.currentTarget.getAttribute('number'))
 
     # Filter issues
     @currentView.on "click", "#moustache-issue-filters ul li", (e) ->
@@ -174,25 +186,41 @@ module.exports =
   loadData: ->
     _view = @currentView
 
+    _view.startIssuesLoading unless MTCurrentIssues
+
+    # Render the repos
+    _view.renderRepos(MTRepos)
+
     # Fetch all the users repositories
     github.repos.getAll {}, (err, repos) ->
-
-      Array::forEach.call repos, (repo, i) ->
-        MTRepos.push(new MTRepo(repo.name, repo.open_issues))
-
-      moustacheRepositories = repos if repos # update the stored repos
-      _view.renderRepos(repos) if repos # render the repos
       console.log err if err
+
+      # upate the repos
+      Array::forEach.call repos, (repo, i) ->
+        MTRepos.push(new MTRepo(repo))
+
+      # Refresh the repos
+      _view.renderRepos(MTRepos)
+
+
+    # Render the current Issues
+    _view.renderIssues(MTCurrentIssues) if MTCurrentIssues
 
     # Fetch all of the users open issues
     github.issues.getAll { state:"open", filter:"all" }, (err, issues) ->
+      console.log "Moustache:synced #{issues.length} issues"
 
+      # Store each issue
       Array::forEach.call issues, (issue, i) ->
-        MTIssues.push(new MTIssue(issue.title, issue.state))
+        MTIssues.push(new MTIssue(issue))
 
+      # If there isnt already a selected issue set then load all
+      unless MTCurrentIssues
+        MTCurrentIssues = MTIssues
+        _view.renderIssues(issues)
+
+      # Stop any loading animation
       _view.stopIssuesLoading()
-      _view.renderIssues(issues) if issues
-      moustacheIssues = issues if issues
       console.log err if err
 
   viewRepo: (index) ->
@@ -223,9 +251,9 @@ module.exports =
         moustacheIssues = issues if issues #store the issues
         console.log err if err
 
-  viewIssue: (index) ->
+  viewIssue: (number) ->
     _view = @currentView
-    issue = moustacheIssues[index] # Get the issues from the stored issues array
+    issue = getIssue(number)
     moustacheIssue = issue # Set the current issue
     moustacheRepo = issue.repository if issue.repository # set the current repo if there is one
     _view.renderIssue(github, issue, moustacheRepo) # render the issue

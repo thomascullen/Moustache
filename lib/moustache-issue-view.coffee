@@ -3,8 +3,8 @@
 module.exports =
 class IssueView extends View
 
-  @content: (issue, index) ->
-    @li index:index, =>
+  @content: (issue) ->
+    @li number:issue.number, =>
       @div class:"moustache-issue-tag-dots", =>
         @div class:"moustache-issue-dot", style:"background:##{label.color}" for label in issue.labels
       @span issue.comments
