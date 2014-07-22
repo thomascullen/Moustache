@@ -29,6 +29,17 @@ MTIssues.get = (id) ->
     i++
   return issue
 
+MTIssues.updateState = (id,state) ->
+  i = 0
+  issue = undefined
+  while i < MTIssues.length
+    if parseInt(MTIssues[i].id) == id
+      issue = MTIssues[i]
+      issue.state = state
+      break
+    i++
+  return issue
+
 MTRepos.get = (id) ->
   i = 0
   repo = undefined
@@ -328,8 +339,12 @@ module.exports =
 
   toggleIssueState: (issue) ->
     _view = @currentView
+
+    _view.find(".moustache-issue[issue=#{issue.id}]").remove()
+
     if issue.state == "open"
       _view.find('#moustache-toggle-issue-state').addClass("open").text("Reopen Issue")
+      MTIssues.updateState(issue.id, "closed")
       github.issues.edit {
         user:issue.repository.owner.login,
         repo:issue.repository.name,
@@ -339,6 +354,7 @@ module.exports =
           console.log "Issue closed"
     else
       _view.find('#moustache-toggle-issue-state').removeClass("open").text("Close Issue")
+      MTIssues.updateState(issue.id, "open")
       github.issues.edit {
         user:issue.repository.owner.login,
         repo:issue.repository.name,
