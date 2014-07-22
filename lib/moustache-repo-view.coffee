@@ -4,7 +4,7 @@ module.exports =
 class RepoView extends View
 
   @content: (repo) ->
-    @li id:repo.id, =>
+    @li repo:repo.id, =>
       @p repo.name.substring(0,17);
       @span "( "+repo.open_issues+" )"
 

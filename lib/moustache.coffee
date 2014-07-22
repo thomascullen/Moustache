@@ -135,19 +135,25 @@ module.exports =
     @currentView.on "click", "#moustache-repos li", (e) ->
       _currentView.find("#moustache-repos li").removeClass "current"
       e.currentTarget.classList.add("current")
-      _this.viewRepo(parseInt(e.currentTarget.getAttribute('id')))
+      _this.viewRepo(parseInt(e.currentTarget.getAttribute('repo')))
 
     # View Issue
     @currentView.on "click", "#moustache-issues li", (e) ->
       _currentView.find("#moustache-issues li").removeClass "current"
       e.currentTarget.classList.add("current")
-      _this.viewIssue(parseInt(e.currentTarget.getAttribute('id')))
+      _this.viewIssue(parseInt(e.currentTarget.getAttribute('issue')))
 
     # Filter issues
     @currentView.on "click", "#moustache-issue-filters ul li", (e) ->
       _currentView.find("#moustache-issue-filters ul li").removeClass "current"
       e.currentTarget.classList.add("current")
       _this.filterIssues(e.currentTarget.textContent.toLowerCase())
+
+    # Close Repo
+    @currentView.on "click", "#moustache-toggle-issue-state", (e) ->
+      id = parseInt(e.currentTarget.getAttribute('issue'))
+      issue = MTIssues.get(id)
+      _this.toggleIssueState(issue)
 
     # New Comment
     @currentView.on "keyup", "#moustache-new-comment", (e) ->
@@ -320,3 +326,23 @@ module.exports =
     MTCurrentIssues = MTFilter(state, MTCurrentRepo)
     _view.renderIssues(MTCurrentIssues)
 
+  toggleIssueState: (issue) ->
+    _view = @currentView
+    if issue.state == "open"
+      _view.find('#moustache-toggle-issue-state').addClass("open").text("Reopen Issue")
+      github.issues.edit {
+        user:issue.repository.owner.login,
+        repo:issue.repository.name,
+        number:issue.number,
+        state:"closed"
+        }, (err) ->
+          console.log "Issue closed"
+    else
+      _view.find('#moustache-toggle-issue-state').removeClass("open").text("Close Issue")
+      github.issues.edit {
+        user:issue.repository.owner.login,
+        repo:issue.repository.name,
+        number:issue.number,
+        state:"open"
+        }, (err) ->
+          console.log "Issue re opened"
