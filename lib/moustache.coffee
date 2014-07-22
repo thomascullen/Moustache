@@ -15,25 +15,58 @@ moustacheUser = null
 MTIssues = []
 MTRepos = []
 MTCurrentIssues = null
-MTCurrentRepos = null
+MTCurrentRepo = null
 
-getIssue = (number) ->
-  Array::forEach.call MTIssues, (MTIssue, i) ->
-    return MTIssue if parseInt(MTIssue.number) == parseInt(number)
+# method to fetch a single issue
+MTIssues.get = (id) ->
+  i = 0
+  issue = undefined
+  while i < MTIssues.length
+    if parseInt(MTIssues[i].id) == id
+      issue = MTIssues[i]
+      break
+    i++
+  return issue
 
+MTRepos.get = (id) ->
+  i = 0
+  repo = undefined
+  while i < MTRepos.length
+    if parseInt(MTRepos[i].id) == id
+      repo = MTRepos[i]
+      break
+    i++
+  return repo
+
+
+# Issue Class
 MTIssue = (issue) ->
+  @id = issue.id
   @number = issue.number
   @title = issue.title
   @state = issue.state
   @comments = issue.comments
   @body = issue.body
   @labels = issue.labels
+  @repository = issue.repository
   return
 
+# Repo Class
 MTRepo = (repo) ->
   @id = repo.id
   @name = repo.name
   @open_issues = repo.open_issues
+
+  @getIssues = ->
+    i = 0
+    issues = []
+    repoID = parseInt(repo.id)
+    while i < MTIssues.length
+      if parseInt(MTIssues[i].repository.id) == repoID
+        issues.push(MTIssues[i])
+      i++
+    return issues
+
   return
 
 module.exports =
@@ -67,13 +100,13 @@ module.exports =
     @currentView.on "click", "#moustache-repos li", (e) ->
       _currentView.find("#moustache-repos li").removeClass "current"
       e.currentTarget.classList.add("current")
-      _this.viewRepo(e.currentTarget.getAttribute('index'))
+      _this.viewRepo(parseInt(e.currentTarget.getAttribute('id')))
 
     # View Issue
     @currentView.on "click", "#moustache-issues li", (e) ->
       _currentView.find("#moustache-issues li").removeClass "current"
       e.currentTarget.classList.add("current")
-      _this.viewIssue(e.currentTarget.getAttribute('number'))
+      _this.viewIssue(parseInt(e.currentTarget.getAttribute('id')))
 
     # Filter issues
     @currentView.on "click", "#moustache-issue-filters ul li", (e) ->
@@ -207,8 +240,7 @@ module.exports =
     _view.renderIssues(MTCurrentIssues) if MTCurrentIssues
 
     # Fetch all of the users open issues
-    github.issues.getAll { state:"open", filter:"all" }, (err, issues) ->
-      console.log "Moustache:synced #{issues.length} issues"
+    github.issues.getAll { state:"open", filter:"all", per_page:100 }, (err, issues) ->
 
       # Store each issue
       Array::forEach.call issues, (issue, i) ->
@@ -223,37 +255,27 @@ module.exports =
       _view.stopIssuesLoading()
       console.log err if err
 
-  viewRepo: (index) ->
+  viewRepo: (id) ->
     _view = @currentView
     _view.find("#moustache-issues").html("") # Clear issues view
     _view.find("#moustache-moustache-main-view").html("") # Clear main view
     _view.find("#moustache-issue-filters ul li").removeClass("current")
     _view.find("#moustache-issue-filters ul li").first().addClass("current")
-    _view.startIssuesLoading() # Show loading animation
 
     # if an index was passed then fetch that repo from the moustacheRepositories array.
     # Otherwise assume they have selected all issues and load all issues
-    if index
-      repository = moustacheRepositories[index]
-      moustacheRepo = repository # Set the current repository
-      # Fetch reposiroies issues
-      github.issues.repoIssues { user:repository.owner.login, repo:repository.name }, (err, issues) ->
-        _view.stopIssuesLoading() # Stop loading animation
-        _view.renderIssues(issues) if issues # render the issues
-        moustacheIssues = issues if issues # store the issues
-        console.log err if err
+    if id
+      MTCurrentRepo = MTRepos.get(id)
+      MTCurrentIssues = MTCurrentRepo.getIssues()
     else
-      moustacheRepo = null
-      # Geth all the users issues
-      github.issues.getAll {}, (err, issues) ->
-        _view.stopIssuesLoading() # stop loading animation
-        _view.renderIssues(issues) if issues # render the issues
-        moustacheIssues = issues if issues #store the issues
-        console.log err if err
+      MTCurrentRepo = null
+      MTCurrentIssues = MTIssues
 
-  viewIssue: (number) ->
+    _view.renderIssues(MTCurrentIssues)
+
+  viewIssue: (id) ->
     _view = @currentView
-    issue = getIssue(number)
+    issue = MTIssues.get(id)
     moustacheIssue = issue # Set the current issue
     moustacheRepo = issue.repository if issue.repository # set the current repo if there is one
     _view.renderIssue(github, issue, moustacheRepo) # render the issue
