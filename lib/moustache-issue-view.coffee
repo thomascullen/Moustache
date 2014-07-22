@@ -9,7 +9,7 @@ class IssueView extends View
         @div class:"moustache-issue-dot", style:"background:##{label.color}" for label in issue.labels
       @span issue.comments
       @h3 issue.title
-      @p issue.body.substring(0,160)
+      @h4 issue.state
 
   initialize: (serializeState) ->
     atom.workspaceView.append(this)

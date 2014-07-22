@@ -1,7 +1,7 @@
 {View} = require 'atom'
 markdown = require( "markdown" ).markdown
 MoustacheCommentView = require './moustache-comment-view'
-moustacheIssue = null
+MTIssue = null
 moustacheRepository = null
 moustacheGithub = null
 path = atom.packages.packageDirPaths[0] + "/moustache/"
@@ -9,13 +9,11 @@ path = atom.packages.packageDirPaths[0] + "/moustache/"
 module.exports =
 class IssueDetailView extends View
 
-  @content: (github, issue, repository) ->
-    moustacheIssue = issue
-    moustacheRepository = repository
-    moustacheGithub = github
+  @content: (issue) ->
+    MTIssue = issue
     @div id:"moustache-issue-detail", =>
       @button id:"moustache-toggle-issue-state", click:"toggleIssue", outlet:"toggleButton", ''
-      @h4 repository.name
+      @h4 issue.repository.name
       @h3 issue.title
       @ul id:"moustache-issue-labels", =>
         @li style:"border-color:##{label.color};color:##{label.color}", label.name for label in issue.labels
@@ -28,7 +26,7 @@ class IssueDetailView extends View
     @moustacheDescription.html( markdown.toHTML( @moustacheDescription.text() ) )
 
     _toggleButton = @toggleButton
-    if moustacheIssue.state == "open"
+    if MTIssue.state == "open"
       _toggleButton.text("Close Issue")
     else
       _toggleButton.addClass("open").text("Reopen Issue")

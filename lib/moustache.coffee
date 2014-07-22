@@ -14,8 +14,9 @@ moustacheUser = null
 
 MTIssues = []
 MTRepos = []
-MTCurrentIssues = null
+MTCurrentIssues = []
 MTCurrentRepo = null
+MTState = "open"
 
 # method to fetch a single issue
 MTIssues.get = (id) ->
@@ -37,7 +38,6 @@ MTRepos.get = (id) ->
       break
     i++
   return repo
-
 
 # Issue Class
 MTIssue = (issue) ->
@@ -68,6 +68,27 @@ MTRepo = (repo) ->
     return issues
 
   return
+
+# Filter issues
+MTFilter = (state, repo) ->
+
+  MTState = state
+
+  if repo
+    MTCurrentIssues = repo.getIssues()
+  else
+    MTCurrentIssues = MTIssues
+
+  if state == "all"
+    return MTCurrentIssues
+
+  i = 0
+  issues = []
+  while i < MTCurrentIssues.length
+    if MTCurrentIssues[i].state == state
+      issues.push(MTCurrentIssues[i])
+    i++
+  return issues
 
 module.exports =
   currentview: null
@@ -219,7 +240,7 @@ module.exports =
   loadData: ->
     _view = @currentView
 
-    _view.startIssuesLoading unless MTCurrentIssues
+    _view.startIssuesLoading unless MTCurrentIssues.length > 0
 
     # Render the repos
     _view.renderRepos(MTRepos)
@@ -237,19 +258,20 @@ module.exports =
 
 
     # Render the current Issues
-    _view.renderIssues(MTCurrentIssues) if MTCurrentIssues
+    _view.renderIssues(MTCurrentIssues) if MTCurrentIssues.length > 0
 
-    # Fetch all of the users open issues
-    github.issues.getAll { state:"open", filter:"all", per_page:100 }, (err, issues) ->
+    # Fetch all of the users issues
+    github.issues.getAll { state:"all", filter:"all", per_page:100 }, (err, issues) ->
 
       # Store each issue
       Array::forEach.call issues, (issue, i) ->
         MTIssues.push(new MTIssue(issue))
 
       # If there isnt already a selected issue set then load all
-      unless MTCurrentIssues
+      unless MTCurrentIssues.length > 1
         MTCurrentIssues = MTIssues
-        _view.renderIssues(issues)
+        MTCurrentIssues = MTFilter(MTState)
+        _view.renderIssues(MTCurrentIssues)
 
       # Stop any loading animation
       _view.stopIssuesLoading()
@@ -266,33 +288,19 @@ module.exports =
     # Otherwise assume they have selected all issues and load all issues
     if id
       MTCurrentRepo = MTRepos.get(id)
-      MTCurrentIssues = MTCurrentRepo.getIssues()
     else
       MTCurrentRepo = null
-      MTCurrentIssues = MTIssues
 
+    MTCurrentIssues = MTFilter("open", MTCurrentRepo)
     _view.renderIssues(MTCurrentIssues)
 
   viewIssue: (id) ->
     _view = @currentView
     issue = MTIssues.get(id)
-    moustacheIssue = issue # Set the current issue
-    moustacheRepo = issue.repository if issue.repository # set the current repo if there is one
-    _view.renderIssue(github, issue, moustacheRepo) # render the issue
+    _view.renderIssue(github, issue) # render the issue
 
-  filterIssues: (filter) ->
+  filterIssues: (state) ->
     _view = @currentView
-    _view.startIssuesLoading()
+    MTCurrentIssues = MTFilter(state, MTCurrentRepo)
+    _view.renderIssues(MTCurrentIssues)
 
-    if moustacheRepo
-      github.issues.repoIssues { user:moustacheRepo.owner.login, repo:moustacheRepo.name, state:filter }, (err, issues) ->
-        _view.stopIssuesLoading()
-        _view.renderIssues(issues) if issues
-        moustacheIssues = issues if issues
-        console.log err if err
-    else
-      github.issues.getAll { state:filter }, (err, issues) ->
-        _view.stopIssuesLoading()
-        _view.renderIssues(issues) if issues
-        moustacheIssues = issues if issues
-        console.log err if err
