@@ -19,7 +19,12 @@
     margin:0;
     padding:0;
     font-family: 'Lato', sans-serif !important;
+    -webkit-font-smoothing: antialiased;
   }
+
+  .clearfix:before, .clearfix:after { content: ""; display: table; }
+  .clearfix:after { clear: both; }
+  .clearfix { *zoom: 1; }
 
   #moustache-login{
     top:50%;
@@ -69,6 +74,26 @@
     width:calc(~'100% - 40px');
     height:calc(~'100% - 40px');
     box-shadow:0 1px 10px rgba(0,0,0,.4);
+
+
+    .mt-labels{
+
+      .mt-label{
+        color:#FFF;
+        height:16px;
+        font-size:9px;
+        padding:0 5px;
+        font-weight:600;
+        line-height:15px;
+        border-radius:2px;
+        margin-right:10px;
+        display:inline-block;
+        border:1px solid #FFF;
+        text-transform:uppercase;
+        box-shadow:0 1px 2px rgba(0,0,0,.04);
+      }
+
+    }
 
 
     // Sidebar
@@ -134,6 +159,7 @@
 
           span{
             font-weight:300;
+            font-size:12px;
             display:inline-block;
           }
 
@@ -212,28 +238,25 @@
 
         li{
             width:100%;
+            padding:20px;
             cursor:pointer;
             overflow-x:hidden;
             position:relative;
             box-shadow:0 1px 0 #eee;
-            padding:15px 15px 15px 40px;
             -webkit-box-sizing: border-box;
 
-            .moustache-issue-tag-dots{
-              top:18px;
-              left:15px;
-              width:10px;
-              position:absolute;
+            h4{
+              color: #989ba0;
+              font-weight:600;
+              font-size: 12px;
+            }
 
-              .moustache-issue-dot{
-                width:8px;
-                height:8px;
-                display:block;
-                border-radius:4px;
-                margin-bottom:8px;
-                background:rgba(73, 144, 226, 1.0);
-              }
-
+            h3{
+              color:#444;
+              font-size:16px;
+              font-weight:600;
+              line-height:22px;
+              margin-bottom:4px;
             }
 
             span{
@@ -242,18 +265,6 @@
               right:10px;
               font-size:12px;
               position:absolute;
-            }
-
-            h4{
-              font-size: 13px;
-              color: @font-dark;
-              margin-bottom:5px;
-            }
-
-            h3{
-              font-size:17px;
-              line-height:22px;
-              margin-bottom:7px;
             }
 
             p{
@@ -324,21 +335,6 @@
         margin-bottom:15px;
       }
 
-      #moustache-issue-labels{
-        list-style:none;
-        margin-bottom:10px;
-
-        li{
-          font-size:13px;
-          padding:0px 10px;
-          border-radius:3px;
-          margin-right:10px;
-          display:inline-block;
-          border:1px solid @m-blue;
-        }
-
-      }
-
       p{
         font-size:15px;
         font-weight:400;
@@ -364,27 +360,37 @@
 
         li{
           width:100%;
-          color:#717d7f;
+          color:#444;
           position:relative;
           margin-bottom:25px;
 
           img{
-            top:4px;
             width:35px;
             float:left;
-            margin-top:2px;
             border-radius:3px;
-            margin-right:15px;
-            position:absolute;
+            margin-right:20px;
           }
 
           .comment-content{
-            margin-left:60px;
-            padding:10px 15px;
-            border-radius:8px;
-            background:#f5f5f5;
-            width:calc(~'100% - 70px');
+            float:left;
+            padding:7px 15px;
+            border-radius:4px;
+            position:relative;
+            background:#f3f3f3;
+            width:calc(~'100% - 60px');
             -webkit-box-sizing: border-box;
+
+            .tab{
+              top:6px;
+              width:0;
+              height:0;
+              left:-7px;
+              display:block;
+              position:absolute;
+              border-right:7px solid #f3f3f3;
+              border-top:7px solid transparent;
+              border-bottom:7px solid transparent;
+            }
 
             h4{
               margin:0;
@@ -394,23 +400,15 @@
 
             p{
               font-size:14px;
-              font-weight:300;
+              font-weight:400;
             }
 
           }
 
         }
 
-        li:nth-child(even){
-
-          img{right:0;}
-
-          .comment-content{
-            margin-left:0;
-            background:white;
-            border:2px solid #f5f5f5;
-          }
-
+        li.true .comment-content{
+          -webkit-animation:fadeUp .5s ease-in;
         }
 
       }
@@ -468,5 +466,21 @@
   100%{
     opacity:1;
     -webkit-transform:scale(1);
+  }
+}
+
+
+@-webkit-keyframes fadeUp{
+  0%{
+    opacity:0;
+    -webkit-transform:translate(0,60px);
+  }
+  60%{
+    opacity:1;
+    -webkit-transform:translate(0,-5px);
+  }
+  100%{
+    opacity:1;
+    -webkit-transform:translate(0,0px);
   }
 }

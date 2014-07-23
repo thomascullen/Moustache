@@ -13,9 +13,10 @@ MTDataIssues = DocStore.collection(MTDataPath+"issues")
 # Setup github API
 github = new GitHubApi( version: "3.0.0" )
 
-moustacheUser = null
+MTCurrentUser = null
 MTCurrentIssues = []
 MTCurrentRepo = null
+MTCurrentIssue = null
 MTState = "open"
 
 # Issue Class
@@ -36,17 +37,6 @@ MTRepo = (repo) ->
   @id = repo.id
   @name = repo.name
   @open_issues = repo.open_issues
-
-  @getIssues = ->
-    i = 0
-    issues = []
-    repoID = parseInt(repo.id)
-    while i < MTIssues.length
-      if parseInt(MTIssues[i].repository.id) == repoID
-        issues.push(MTIssues[i])
-      i++
-    return issues
-
   return
 
 MTIssues = []
@@ -138,31 +128,29 @@ module.exports =
       _this.toggleIssueState(id)
 
     # New Comment
-    # @currentView.on "keyup", "#moustache-new-comment", (e) ->
-    #   if e.keyCode == 13
-    #
-    #     content = document.getElementById("moustache-new-comment").value
-    #     document.getElementById("moustache-new-comment").value = ""
-    #
-    #     # create the issue comment
-    #     github.issues.createComment {
-    #       user:moustacheRepo.owner.login,
-    #       repo:moustacheRepo.name,
-    #       number:moustacheIssue.number,
-    #       body: content }, (err, issues) ->
-    #         console.log err if err
-    #
-    #     # Create a new comment object
-    #     # This is the same structure as returned
-    #     # from the github issues api comments call
-    #     comment =
-    #       user:
-    #         login: "Current User"
-    #       body: content
-    #
-    #     # Render the new comment
-    #     commentView = new MoustacheCommentView(comment)
-    #     _currentView.find("#moustache-comments").append(commentView)
+    @currentView.on "keyup", "#moustache-new-comment", (e) ->
+      if e.keyCode == 13
+
+        content = document.getElementById("moustache-new-comment").value
+        document.getElementById("moustache-new-comment").value = ""
+
+        # create the issue comment
+        github.issues.createComment {
+          user:MTCurrentIssue.repository.owner.login,
+          repo:MTCurrentIssue.repository.name,
+          number:MTCurrentIssue.number,
+          body: content }, (err, issues) ->
+            console.log err if err
+
+        # Create a new comment object
+        comment =
+          user:
+            avatar_url:MTCurrentUser.avatar_url
+          body: content
+
+        # Render the new comment
+        commentView = new MoustacheCommentView(comment, true)
+        _currentView.find("#moustache-comments").append(commentView)
 
   toggle: ->
     _this = this
@@ -209,14 +197,14 @@ module.exports =
       atom.workspaceView.append(@currentView)
 
       # Fetch the current user if there isnt one
-      unless moustacheUser
+      unless MTCurrentUser
         # get the users information
         github.user.get {}, (err, user) ->
-          moustacheUser = user # store user
-          _currentView.renderUser(moustacheUser)
+          MTCurrentUser = user # store user
+          _currentView.renderUser(MTCurrentUser)
       else
         # Render the current user section
-        _currentView.renderUser(moustacheUser)
+        _currentView.renderUser(MTCurrentUser)
 
       _this.load()
 
@@ -264,6 +252,7 @@ module.exports =
   viewIssue: (id) ->
     _view = @currentView
     issue = MTDataIssues.find({id:id})
+    MTCurrentIssue = issue
     _view.renderIssue(github, issue) # render the issue
 
   filterIssues: (state) ->

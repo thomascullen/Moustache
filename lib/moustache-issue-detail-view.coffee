@@ -3,7 +3,7 @@ markdown = require( "markdown" ).markdown
 MoustacheCommentView = require './moustache-comment-view'
 MTIssue = null
 moustacheRepository = null
-moustacheGithub = null
+MTGithub = null
 path = atom.packages.packageDirPaths[0] + "/moustache/"
 
 module.exports =
@@ -15,8 +15,8 @@ class IssueDetailView extends View
       @button id:"moustache-toggle-issue-state", issue:issue.id, outlet:"toggleButton", ''
       @h4 issue.repository.name
       @h3 issue.title
-      @ul id:"moustache-issue-labels", =>
-        @li style:"border-color:##{label.color};color:##{label.color}", label.name for label in issue.labels
+      @div class:"mt-labels", =>
+          @div class:"mt-label", style:"border-color:##{label.color};color:##{label.color}", label.name for label in issue.labels
       @p outlet:"moustacheDescription", id:"moustache-description", issue.body
       @ul id:"moustache-comments", outlet:"moustacheComments", =>
       @textarea id:"moustache-new-comment", placeholder:"Write a new comment", class:"native-key-bindings"
@@ -44,8 +44,11 @@ class IssueDetailView extends View
     @moustacheComments.css({background:'white',minHeight:0});
 
   renderComments: (comments) ->
+    _this = this
     this.stopCommentsLoading();
-    commentsList = @moustacheComments
     Array::forEach.call comments, (comment, i) ->
-      commentView = new MoustacheCommentView(comment)
-      commentsList.append(commentView)
+      _this.renderComment(comment, false)
+
+  renderComment: (comment, animated) ->
+    commentView = new MoustacheCommentView(comment, animated)
+    @moustacheComments.append(commentView)
