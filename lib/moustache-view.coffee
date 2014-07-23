@@ -41,6 +41,7 @@ class MoustacheView extends View
 
   startIssuesLoading: ->
     @moustacheIssues.html("")
+    # Use atom://package-name/ instead
     @moustacheIssues.css('background',"url("+path+"stylesheets/loading.gif"+") no-repeat center");
 
   stopIssuesLoading: ->

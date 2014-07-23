@@ -11,7 +11,7 @@ class MoustacheLoginView extends View
         @input type:"submit", value:"Login", id:"moustache-login-button"
 
   initialize: (serializeState) ->
-    
+
 
   serialize: ->
 
