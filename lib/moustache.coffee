@@ -155,22 +155,15 @@ module.exports =
   toggle: ->
     _this = this
 
+    # window.localStorage.removeItem("moustacheToken")
+    # window.localStorage.removeItem("moustacheID")
+
     # If the moustache view is open then remove it
     if @currentView
       @currentView.toggle()
     else
-      @username = window.localStorage.getItem("github-username")
-      password = window.localStorage.getItem("github-password")
-
-      # If there is a username & password then proceed with login
-      if @username && password
-        _this.login(@username, password)
-      else
-        # present login form
-        @currentView = new MoustacheLoginView()
-        atom.workspaceView.append(@currentView)
-
-      # Attach moustache listeners
+      @currentView = new MoustacheLoginView()
+      atom.workspaceView.append(@currentView)
       _this.listeners()
 
   login: (username, password) ->
@@ -178,33 +171,19 @@ module.exports =
 
     if username.length > 0 && password.length > 0
 
-      # Store the username & password in localstorage
-      window.localStorage.setItem("github-username", username)
-      window.localStorage.setItem("github-password", password)
-
-      # Destroy any current views there might be
-      @currentView.destroy() if @currentView
-
-      # Authenticate the github API
+      # Authenticate the github API with basic auth
       github.authenticate
         type: "basic"
         username: username
         password: password
 
+      # Destroy any current views there might be
+      @currentView.destroy() if @currentView
+
       # Create a new main moustache view
       @currentView = new MoustacheView()
       _currentView = @currentView
       atom.workspaceView.append(@currentView)
-
-      # Fetch the current user if there isnt one
-      unless MTCurrentUser
-        # get the users information
-        github.user.get {}, (err, user) ->
-          MTCurrentUser = user # store user
-          _currentView.renderUser(MTCurrentUser)
-      else
-        # Render the current user section
-        _currentView.renderUser(MTCurrentUser)
 
       _this.load()
 
@@ -212,12 +191,8 @@ module.exports =
       alert "Please enter a valid username & password"
 
   logout: ->
-    # Remove the username & password from localstorage
-    window.localStorage.removeItem("github-username")
-    window.localStorage.removeItem("github-password")
-    # Destroy the current view
+    window.localStorage.removeItem("moustacheToken")
     @currentView.destroy()
-    # Show the login form
     @currentView = new MoustacheLoginView()
     atom.workspaceView.append(@currentView)
 
@@ -229,6 +204,7 @@ module.exports =
     _view.renderIssues(MTCurrentIssues)
 
     this.sync()
+    this.listeners()
 
   viewRepo: (id) ->
     _view = @currentView
