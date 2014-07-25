@@ -4,7 +4,7 @@ module.exports =
 class MoustacheLoginView extends View
 
   @content:(state) ->
-    @div class: 'moustache-wrapper', id:"moustache-wrapper", =>
+    @div class: 'moustache-wrapper login-wrapper', id:"moustache-wrapper", =>
       @div id: "moustache-login", =>
         @h2 'Sign In'
         @input type:"text", placeholder:"Github Username", class:"native-key-bindings", id:"moustache-username"

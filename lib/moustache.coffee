@@ -17,6 +17,7 @@ MTCurrentUser = null
 MTCurrentIssues = []
 MTCurrentRepo = null
 MTCurrentIssue = null
+MTCurrentView = null
 MTState = "open"
 
 # Issue Class
@@ -65,21 +66,19 @@ MTSyncRepos = (callback) ->
     callback()
 
 module.exports =
-  currentview: null
-  username: null
+  currentView: null
 
   sync: ->
-    _view = @currentView
     console.log "Moustache Syncing Issues"
 
-    _view.startIssuesLoading() unless MTDataIssues.objects.length > 0
+    MTCurrentView.startIssuesLoading() unless MTDataIssues.objects.length > 0
 
     MTSyncIssues 1, ->
       console.log "Finished Syncing Issues"
-      _view.renderIssues(MTDataIssues.objects) unless MTCurrentIssues.length > 0
+      MTCurrentView.renderIssues(MTDataIssues.objects) unless MTCurrentIssues.length > 0
 
     MTSyncRepos ->
-      _view.renderRepos(MTDataRepos.objects)
+      MTCurrentView.renderRepos(MTDataRepos.objects)
 
   activate: (state) ->
     atom.workspaceView.command "moustache:toggle", => @toggle()
@@ -92,43 +91,42 @@ module.exports =
 
   listeners: ->
     _this = this
-    _currentView = @currentView
 
     # Login
-    @currentView.on "click", "#moustache-login-button", ->
+    MTCurrentView.on "click", "#moustache-login-button", ->
       username = document.getElementById("moustache-username").value
       password = document.getElementById("moustache-password").value
       _this.login(username, password)
 
     # Logout
-    @currentView.on "click", "#moustache-logout", (e) ->
+    MTCurrentView.on "click", "#moustache-logout", (e) ->
       _this.logout()
 
     # View Repo
-    @currentView.on "click", "#moustache-repos li", (e) ->
-      _currentView.find("#moustache-repos li").removeClass "current"
+    MTCurrentView.on "click", "#moustache-repos li", (e) ->
+      MTCurrentView.find("#moustache-repos li").removeClass "current"
       e.currentTarget.classList.add("current")
       _this.viewRepo(parseInt(e.currentTarget.getAttribute('repo')))
 
     # View Issue
-    @currentView.on "click", "#moustache-issues li", (e) ->
-      _currentView.find("#moustache-issues li").removeClass "current"
+    MTCurrentView.on "click", "#moustache-issues li", (e) ->
+      MTCurrentView.find("#moustache-issues li").removeClass "current"
       e.currentTarget.classList.add("current")
       _this.viewIssue(parseInt(e.currentTarget.getAttribute('issue')))
 
     # Filter issues
-    @currentView.on "click", "#moustache-issue-filters ul li", (e) ->
-      _currentView.find("#moustache-issue-filters ul li").removeClass "current"
+    MTCurrentView.on "click", "#moustache-issue-filters ul li", (e) ->
+      MTCurrentView.find("#moustache-issue-filters ul li").removeClass "current"
       e.currentTarget.classList.add("current")
       _this.filterIssues(e.currentTarget.textContent.toLowerCase())
 
     # Toggle Issue State
-    @currentView.on "click", "#moustache-toggle-issue-state", (e) ->
+    MTCurrentView.on "click", "#moustache-toggle-issue-state", (e) ->
       id = parseInt(e.currentTarget.getAttribute('issue'))
       _this.toggleIssueState(id)
 
     # New Comment
-    @currentView.on "keyup", "#moustache-new-comment", (e) ->
+    MTCurrentView.on "keyup", "#moustache-new-comment", (e) ->
       if e.keyCode == 13
 
         content = document.getElementById("moustache-new-comment").value
@@ -150,20 +148,20 @@ module.exports =
 
         # Render the new comment
         commentView = new MoustacheCommentView(comment, true)
-        _currentView.find("#moustache-comments").append(commentView)
+        MTCurrentView.find("#moustache-comments").append(commentView)
 
   toggle: ->
     _this = this
 
     # If the moustache view is open then remove it
-    if @currentView
-      @currentView.toggle()
-      atom.workspaceView.find('.horizontal').toggleClass("blur")
+    if MTCurrentView
+      MTCurrentView.toggle()
+      atom.workspaceView.find('.horizontal').toggleClass("blur") if MTCurrentView.hasClass("login-wrapper")
       atom.workspaceView.find('#moustache-login-button').removeClass("loading")
       atom.workspaceView.find('#moustache-login').removeClass("error")
     else
-      @currentView = new MoustacheLoginView()
-      atom.workspaceView.append(@currentView)
+      MTCurrentView = new MoustacheLoginView()
+      atom.workspaceView.append(MTCurrentView)
       _this.listeners()
       atom.workspaceView.find('#moustache-username').focus()
 
@@ -190,10 +188,9 @@ module.exports =
           alert(JSON.parse(err.message).message)
           atom.workspaceView.find("#moustache-login").addClass("error")
         else
-          @currentView.destroy() if @currentView
-          @currentView = new MoustacheView()
-          _currentView = @currentView
-          atom.workspaceView.append(@currentView)
+          MTCurrentView.destroy() if MTCurrentView
+          MTCurrentView = new MoustacheView()
+          atom.workspaceView.append(MTCurrentView)
           _this.load()
 
     else
@@ -202,27 +199,25 @@ module.exports =
 
   logout: ->
     window.localStorage.removeItem("moustacheToken")
-    @currentView.destroy()
-    @currentView = new MoustacheLoginView()
-    atom.workspaceView.append(@currentView)
+    MTCurrentView.destroy()
+    MTCurrentView = new MoustacheLoginView()
+    atom.workspaceView.append(MTCurrentView)
 
   load: ->
-    _view = @currentView
-    _view.renderRepos(MTDataRepos.objects)
+    MTCurrentView.renderRepos(MTDataRepos.objects)
 
     MTCurrentIssues = MTDataIssues.where ( {state:MTState} )
-    _view.renderIssues(MTCurrentIssues)
+    MTCurrentView.renderIssues(MTCurrentIssues)
 
     this.sync()
     this.listeners()
 
   viewRepo: (id) ->
-    _view = @currentView
     MTState = "open"
-    _view.find("#moustache-issues").html("") # Clear issues view
-    _view.find("#moustache-moustache-main-view").html("") # Clear main view
-    _view.find("#moustache-issue-filters ul li").removeClass("current")
-    _view.find("#moustache-issue-filters ul li").first().addClass("current")
+    MTCurrentView.find("#moustache-issues").html("") # Clear issues view
+    MTCurrentView.find("#moustache-moustache-main-view").html("") # Clear main view
+    MTCurrentView.find("#moustache-issue-filters ul li").removeClass("current")
+    MTCurrentView.find("#moustache-issue-filters ul li").first().addClass("current")
 
     # if an index was passed then fetch that repo from the moustacheRepositories array.
     # Otherwise assume they have selected all issues and load all issues
@@ -233,16 +228,14 @@ module.exports =
       MTCurrentRepo = null
       MTCurrentIssues = MTDataIssues.where( {state:MTState} )
 
-    _view.renderIssues(MTCurrentIssues)
+    MTCurrentView.renderIssues(MTCurrentIssues)
 
   viewIssue: (id) ->
-    _view = @currentView
     issue = MTDataIssues.find({id:id})
     MTCurrentIssue = issue
-    _view.renderIssue(github, issue) # render the issue
+    MTCurrentView.renderIssue(github, issue) # render the issue
 
   filterIssues: (state) ->
-    _view = @currentView
     MTState = state
 
     if MTCurrentRepo
@@ -255,17 +248,16 @@ module.exports =
     else
       MTCurrentIssues = _.where(issues, {state:state})
 
-    _view.renderIssues(MTCurrentIssues)
+    MTCurrentView.renderIssues(MTCurrentIssues)
 
   toggleIssueState: (id) ->
-    _view = @currentView
     # Remove issue from list view as state has changed
-    _view.find(".moustache-issue[issue=#{id}]").remove()
+    MTCurrentView.find(".moustache-issue[issue=#{id}]").remove()
 
     issue = MTDataIssues.find({id:id})
 
     if issue.state == "open"
-      _view.find('#moustache-toggle-issue-state').addClass("open").text("Reopen Issue")
+      MTCurrentView.find('#moustache-toggle-issue-state').addClass("open").text("Reopen Issue")
 
       issue.state = "closed"
       MTDataIssues.replace({id:id}, issue)
@@ -278,7 +270,7 @@ module.exports =
         }, (err) ->
           console.log "Issue closed"
     else
-      _view.find('#moustache-toggle-issue-state').removeClass("open").text("Close Issue")
+      MTCurrentView.find('#moustache-toggle-issue-state').removeClass("open").text("Close Issue")
 
       issue.state = "open"
       MTDataIssues.replace({id:id}, issue)

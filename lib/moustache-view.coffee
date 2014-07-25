@@ -33,6 +33,7 @@ class MoustacheView extends View
 
   initialize: (serializeState) ->
     atom.workspaceView.append(this)
+    atom.workspaceView.find('.horizontal').removeClass("blur")
 
   serialize: ->
 
