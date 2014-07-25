@@ -94,9 +94,7 @@ module.exports =
 
     # Login
     MTCurrentView.on "click", "#moustache-login-button", ->
-      username = document.getElementById("moustache-username").value
-      password = document.getElementById("moustache-password").value
-      _this.login(username, password)
+      _this.login()
 
     # Logout
     MTCurrentView.on "click", "#moustache-logout", (e) ->
@@ -113,6 +111,16 @@ module.exports =
       MTCurrentView.find("#moustache-issues li").removeClass "current"
       e.currentTarget.classList.add("current")
       _this.viewIssue(parseInt(e.currentTarget.getAttribute('issue')))
+
+    # username field tab fix
+    MTCurrentView.on "keyup", "#moustache-username", (e) ->
+      if e.keyCode == 9
+        atom.workspaceView.find('#moustache-password').focus()
+
+    # submit login with return
+    MTCurrentView.on "keydown", "#moustache-password", (e) ->
+      if e.keyCode == 13
+        _this.login()
 
     # Filter issues
     MTCurrentView.on "click", "#moustache-issue-filters ul li", (e) ->
@@ -156,7 +164,9 @@ module.exports =
     # If the moustache view is open then remove it
     if MTCurrentView
       MTCurrentView.toggle()
-      atom.workspaceView.find('.horizontal').toggleClass("blur") if MTCurrentView.hasClass("login-wrapper")
+      if MTCurrentView.hasClass("login-wrapper")
+        atom.workspaceView.find('.horizontal').toggleClass("blur")
+        atom.workspaceView.find('#moustache-username').focus()
       atom.workspaceView.find('#moustache-login-button').removeClass("loading")
       atom.workspaceView.find('#moustache-login').removeClass("error")
     else
@@ -167,9 +177,12 @@ module.exports =
 
     atom.workspaceView.find('#moustache-login-button').addClass("animated")
 
-  login: (username, password) ->
+  login: ->
     _this = this
     atom.workspaceView.find('#moustache-login-button').removeClass("animated")
+
+    username = document.getElementById("moustache-username").value
+    password = document.getElementById("moustache-password").value
 
     if username.length > 0 && password.length > 0
       atom.workspaceView.find('#moustache-login-button').addClass("loading")
@@ -185,8 +198,8 @@ module.exports =
       github.user.get {}, (err, response) ->
         atom.workspaceView.find('#moustache-login-button').removeClass("loading")
         if err
-          alert(JSON.parse(err.message).message)
           atom.workspaceView.find("#moustache-login").addClass("error")
+          _this.loginError(JSON.parse(err.message).message)
         else
           MTCurrentView.destroy() if MTCurrentView
           MTCurrentView = new MoustacheView()
@@ -195,13 +208,20 @@ module.exports =
 
     else
       atom.workspaceView.find("#moustache-login").addClass("error")
-      alert "Please enter a valid username & password"
+      _this.loginError("Please enter a valid username & password")
 
   logout: ->
     window.localStorage.removeItem("moustacheToken")
     MTCurrentView.destroy()
     MTCurrentView = new MoustacheLoginView()
     atom.workspaceView.append(MTCurrentView)
+
+  loginError: (error) ->
+    if MTCurrentView.find("#mt-login-error").length > 0
+      MTCurrentView.find("#mt-login-error").text error
+    else
+      MTCurrentView.find("#mt-logo").before("<div id='mt-login-error'>"+error+"</div>")
+    atom.workspaceView.find('#moustache-username').focus()
 
   load: ->
     MTCurrentView.renderRepos(MTDataRepos.objects)

@@ -5,7 +5,7 @@
 @m-blue:rgba(79, 175, 215, 1.0);
 
 .blur{
-  -webkit-filter: blur(8px);
+  -webkit-filter: blur(10px);
 }
 
 #moustache-wrapper {
@@ -46,8 +46,8 @@
     h2{
       opacity:0;
       color:#FFF;
-      font-size:25px;
-      font-weight:400;
+      font-size:29px;
+      font-weight:300;
       margin-bottom:30px;
       -webkit-animation:slideUp .5s .3s ease-out FORWARDS;
     }
@@ -76,13 +76,13 @@
       opacity:1;
       color:#FFF;
       border:none;
-      margin-top:5px;
       font-size:13px;
       font-weight:800;
-      margin-bottom:0;
+      margin-bottom:30px;
       background-size:25px 26px;
       border:1px solid rgba(255,255,255,.3);
       background:transparent no-repeat center;
+      -webkit-animation:slideUp .5s .8s ease-out FORWARDS;
     }
 
     #moustache-login-button.animated{opacity:0;-webkit-animation:slideUp .5s .6s ease-out FORWARDS;}
@@ -99,6 +99,22 @@
     }
 
     #moustache-login-button:hover{border-color:rgba(255,255,255,.7)}
+
+    #mt-logo{
+      opacity:0;
+      width:100%;
+      height:17px;
+      display:inline-block;
+      background:url("atom://moustache/stylesheets/logo.png") no-repeat center bottom;
+      background-size:52px 17px;
+      -webkit-animation:fadeIn .8s 1.1s ease-out FORWARDS;
+    }
+
+    #mt-login-error{
+      font-size:13px;
+      height:40px;
+      color:rgba(255,255,255,.5);
+    }
 
   }
 
