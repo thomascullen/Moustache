@@ -4,6 +4,10 @@
 @font-dark:rgba(83, 95, 101, 1.0);
 @m-blue:rgba(79, 175, 215, 1.0);
 
+.blur{
+  -webkit-filter: blur(8px);
+}
+
 #moustache-wrapper {
 
   top:0;
@@ -12,8 +16,8 @@
   height:100%;
   z-index:9999;
   position:absolute;
-  background:rgba(255,255,255,.4);
   -webkit-animation:fadeIn .3s ease-in;
+  background:rgba(156, 102, 253, .2);
 
   *{
     margin:0;
@@ -26,41 +30,80 @@
   .clearfix:after { clear: both; }
   .clearfix { *zoom: 1; }
 
+
   #moustache-login{
     top:50%;
     left:50%;
-    width:400px;
+    width:360px;
     z-index:999;
     padding:20px;
-    background:white;
-    margin-top:-150px;
-    border-radius:3px;
+    text-align:center;
+    margin-top:-180px;
     position:absolute;
     margin-left:-200px;
     -webkit-box-sizing: border-box;
-    box-shadow:0 1px 5px rgba(0,0,0,.4);
-    -webkit-animation:pop .3s linear;
+
+    h2{
+      opacity:0;
+      color:#FFF;
+      font-size:25px;
+      font-weight:400;
+      margin-bottom:30px;
+      -webkit-animation:slideUp .5s .3s ease-out FORWARDS;
+    }
 
     input{
+      opacity:0;
+      color:#FFF;
       width:100%;
+      border:none;
       padding:10px;
-      font-size:15px;
-      font-weight:400;
+      font-size:14px;
+      font-weight:600;
       text-align:center;
       border-radius:2px;
-      margin-bottom:20px;
-      border:1px solid #ccc;
+      margin-bottom:15px;
+      background:rgba(0,0,0,.2);
       -webkit-box-sizing: border-box;
-      box-shadow:0 1px 5px rgba(0,0,0,.05);
     }
 
-    input[type="submit"]{
+    input:focus{background:rgba(0,0,0,.3);}
+
+    #moustache-username{-webkit-animation:slideUp .5s .4s ease-out FORWARDS;}
+    #moustache-password{-webkit-animation:slideUp .5s .5s ease-out FORWARDS;}
+
+    #moustache-login-button{
+      opacity:1;
       color:#FFF;
       border:none;
+      margin-top:5px;
+      font-size:13px;
+      font-weight:800;
       margin-bottom:0;
-      background:#4586f5;
+      background-size:25px 26px;
+      border:1px solid rgba(255,255,255,.3);
+      background:transparent no-repeat center;
     }
 
+    #moustache-login-button.animated{opacity:0;-webkit-animation:slideUp .5s .6s ease-out FORWARDS;}
+
+    #moustache-login-button.loading{
+      opacity:1;
+      width:40px;
+      color:transparent;
+      border-radius:30px;
+      background-color:#FFF;
+      -webkit-transition:all .2s;
+      background-image:url("atom://moustache/stylesheets/loader.gif");
+      background-size:25px 26px;
+    }
+
+    #moustache-login-button:hover{border-color:rgba(255,255,255,.7)}
+
+  }
+
+  #moustache-login.error{
+    -webkit-animation:shake .5s linear;
   }
 
 
@@ -332,7 +375,7 @@
 
       h3{
         font-size:21px;
-        margin-bottom:15px;
+        margin-bottom:10px;
       }
 
       p{
@@ -340,6 +383,10 @@
         font-weight:400;
         line-height:24px;
         color:rgba(160, 165, 169, 1.0);
+      }
+
+      .mt-labels{
+        margin-bottom:15px;
       }
 
       #moustache-description{
@@ -433,40 +480,39 @@
 
 
 // Animations
-@-webkit-keyframes slideDown{
+@-webkit-keyframes slideUp{
   0%{
     opacity:0;
-    -webkit-transform:translate(0, -100px);
+    -webkit-transform:translate(0, 150px);
   }
-  70%{
+  55%{
     opacity:1;
-    -webkit-transform:translate(0,0);
+    -webkit-transform:translate(0,-15px) scaleY(.99);
   }
+
+  75%{
+    opacity:1;
+    -webkit-transform:translate(0,8px);
+  }
+
   100%{
     opacity:1;
-    -webkit-transform:translate(0, 10px);
+    -webkit-transform:translate(0, 0);
   }
+}
+
+@-webkit-keyframes shake{
+  0%{-webkit-transform:translate(0, 0);}
+  20%{-webkit-transform:translate(20px,0);}
+  40%{-webkit-transform:translate(-20px,0);}
+  60%{-webkit-transform:translate(10px, 0);}
+  80%{-webkit-transform:translate(-10px, 0);}
+  100%{-webkit-transform:translate(0, 0);}
 }
 
 @-webkit-keyframes fadeIn{
   0%{opacity:0;}
   100%{opacity:1;}
-}
-
-
-@-webkit-keyframes pop{
-  0%{
-    opacity:0;
-    -webkit-transform:scale(.5);
-  }
-  70%{
-    opacity:1;
-    -webkit-transform:scale(1.1);
-  }
-  100%{
-    opacity:1;
-    -webkit-transform:scale(1);
-  }
 }
 
 

@@ -155,21 +155,27 @@ module.exports =
   toggle: ->
     _this = this
 
-    # window.localStorage.removeItem("moustacheToken")
-    # window.localStorage.removeItem("moustacheID")
-
     # If the moustache view is open then remove it
     if @currentView
       @currentView.toggle()
+      atom.workspaceView.find('.horizontal').toggleClass("blur")
+      atom.workspaceView.find('#moustache-login-button').removeClass("loading")
+      atom.workspaceView.find('#moustache-login').removeClass("error")
     else
       @currentView = new MoustacheLoginView()
       atom.workspaceView.append(@currentView)
       _this.listeners()
+      atom.workspaceView.find('#moustache-username').focus()
+
+    atom.workspaceView.find('#moustache-login-button').addClass("animated")
 
   login: (username, password) ->
     _this = this
+    atom.workspaceView.find('#moustache-login-button').removeClass("animated")
 
     if username.length > 0 && password.length > 0
+      atom.workspaceView.find('#moustache-login-button').addClass("loading")
+      atom.workspaceView.find("#moustache-login").removeClass("error")
 
       # Authenticate the github API with basic auth
       github.authenticate
@@ -177,17 +183,21 @@ module.exports =
         username: username
         password: password
 
-      # Destroy any current views there might be
-      @currentView.destroy() if @currentView
-
-      # Create a new main moustache view
-      @currentView = new MoustacheView()
-      _currentView = @currentView
-      atom.workspaceView.append(@currentView)
-
-      _this.load()
+      # Check successfull login
+      github.user.get {}, (err, response) ->
+        atom.workspaceView.find('#moustache-login-button').removeClass("loading")
+        if err
+          alert(JSON.parse(err.message).message)
+          atom.workspaceView.find("#moustache-login").addClass("error")
+        else
+          @currentView.destroy() if @currentView
+          @currentView = new MoustacheView()
+          _currentView = @currentView
+          atom.workspaceView.append(@currentView)
+          _this.load()
 
     else
+      atom.workspaceView.find("#moustache-login").addClass("error")
       alert "Please enter a valid username & password"
 
   logout: ->
